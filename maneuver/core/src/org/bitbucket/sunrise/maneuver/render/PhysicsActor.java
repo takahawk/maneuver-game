@@ -27,10 +27,15 @@ public class PhysicsActor extends Actor {
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(
                 texture,
-                gameBody.getPosition().x,
-                gameBody.getPosition().y,
+                gameBody.getPosition().x - texture.getRegionWidth() / 2,
+                gameBody.getPosition().y - texture.getRegionHeight() / 2,
+                texture.getRegionWidth() / 2,
+                texture.getRegionHeight() / 2,
                 texture.getRegionWidth(),
-                texture.getRegionHeight()
+                texture.getRegionHeight(),
+                1,
+                1,
+                gameBody.getVelocityAngle() - 90f
         );
     }
 }
