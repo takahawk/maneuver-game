@@ -81,17 +81,9 @@ public class GameScreen implements Screen {
 
             }
         });
-//        plane = new Plane(400, 300);
-//        rocket = new Rocket(plane, 100, 200, 200);
     }
 
     public void handleInput() {
-//        if (Gdx.input.isTouched()) {
-//            if (plane.getPosition().x < Gdx.input.getX())
-//                plane.moveRight(10);
-//            else
-//                plane.moveLeft(10);
-//        }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             plane.rotateVelocity(1f);
             System.out.println(getCameraAngle(cam));
@@ -100,9 +92,6 @@ public class GameScreen implements Screen {
             plane.rotateVelocity(-1f);
             System.out.println(getCameraAngle(cam));
         }
-            //cam.rotate(0.5f);
-//        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-//            plane.moveRight(10);
     }
 
     private float getCameraAngle(Camera cam) {
@@ -138,29 +127,6 @@ public class GameScreen implements Screen {
         stage.draw();
         Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
         debugRenderer.render(debugMatrix);
-//        batch.begin();
-//        Rectangle planeBounds = plane.getBounds();
-//        batch.draw(
-//                planeTexture,
-//                planeBounds.getX(),
-//                planeBounds.getY(),
-//                planeBounds.width,
-//                planeBounds.height
-//        );
-//        Rectangle rocketBounds = rocket.getBounds();
-//        batch.draw(
-//                rocketTexture,
-//                rocketBounds.getX(),
-//                rocketBounds.getY(),
-//                rocketBounds.width / 2,
-//                rocketBounds.height / 2,
-//                rocketBounds.width,
-//                rocketBounds.height,
-//                1,
-//                1,
-//                rocket.getDirectionAngle()
-//        );
-//        batch.end();
     }
 
     @Override
