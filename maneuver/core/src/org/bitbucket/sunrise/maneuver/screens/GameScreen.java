@@ -4,6 +4,7 @@ package org.bitbucket.sunrise.maneuver.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -41,6 +42,8 @@ public class GameScreen implements Screen {
     private TextureRegion rocketTexture = new TextureRegion(new Texture(Gdx.files.internal("rocket.png")));
     private TextureRegion planeTexture = new TextureRegion(new Texture(Gdx.files.internal("plane.png")));
     private Texture background = new Texture(Gdx.files.internal("background.png"));
+
+//    private Sound sound = Gdx.audio.newSound(Gdx.files.internal("sound.mp3"));
 
     public GameScreen(SpriteBatch batch) {
         this.batch = batch;
@@ -84,7 +87,12 @@ public class GameScreen implements Screen {
     }
 
     public void handleInput() {
+        // Обработка нажатий
+        // Gdx.input.isTouched()
+        // Gdx.input.getX();
+        // Gdx.input.getY();
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            // sound.play();
             plane.rotateVelocity(1f);
             System.out.println(getCameraAngle(cam));
         }
