@@ -85,6 +85,10 @@ public class GameWorld {
             setVelocityAngle(angle + oldAngle);
         }
 
+        public GameWorld getWorld() {
+            return GameWorld.this;
+        }
+
         public void setVelocityAngle(float angle) {
             float length = body.getLinearVelocity().len();
             body.setLinearVelocity(
