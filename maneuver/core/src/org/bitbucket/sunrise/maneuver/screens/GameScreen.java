@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
 import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
+import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
 import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class GameScreen implements Screen {
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
 
     public GameScreen(SpriteBatch batch) {
-        planeSound.setVolume(0.5f);
+        planeSound.setVolume(0.3f);
         this.batch = batch;
         world = new GameWorld(new Vector2(0, 0), 0.01f);
         debugRenderer = world.getDebugRenderer();
@@ -106,16 +107,22 @@ public class GameScreen implements Screen {
                 planeActor.remove();
             }
         });
-        Actor backgroundActor = new Actor() {
-
-            @Override
-            public void draw(Batch batch, float parentAlpha) {
-                batch.draw(background, getX(), getY(), background.getWidth(), background.getHeight());
-            }
-        };
+        cam = (OrthographicCamera) stage.getViewport().getCamera();
+        Actor backgroundActor = new InfiniteBackground(
+                    cam,
+                    new TextureRegion(background),
+                    new Vector2(0, 0)
+        );
+//        new Actor() {
+//
+//            @Override
+//            public void draw(Batch batch, float parentAlpha) {
+//                batch.draw(background, getX(), getY(), background.getWidth(), background.getHeight());
+//            }
+//        };
         stage.addActor(backgroundActor);
         backgroundActor.toBack();
-        cam = (OrthographicCamera) stage.getViewport().getCamera();
+
     }
 
     public void playSounds() {
