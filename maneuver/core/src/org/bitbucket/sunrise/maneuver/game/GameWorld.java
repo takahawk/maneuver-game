@@ -101,6 +101,8 @@ public class GameWorld {
             return new Vector2(body.getPosition().x / scale, body.getPosition().y / scale);
         }
 
+        public Body getBody() {return this.body; }
+
     }
 
     public GameWorld(Vector2 gravity) {
@@ -172,5 +174,9 @@ public class GameWorld {
 
     public void addContactHandler(GameBody first, GameBody second, ContactListener listener) {
         contactListeners.put(new ContactPair(first, second), listener);
+    }
+
+    public void destroyBody(GameBody body) {
+        world.destroyBody(body.getBody());
     }
 }
