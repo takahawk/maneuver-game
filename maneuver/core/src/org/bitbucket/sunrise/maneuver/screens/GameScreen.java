@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class GameScreen implements Screen {
     private static final float ROCKET_SPAWN_FREQ = 5f;
-    private static final float ROCKET_DISTANCE = 10000f;
+    private static final float ROCKET_DISTANCE = 300f;
     private static final float ROCKET_FORCE = 100f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;

@@ -1,5 +1,6 @@
 package org.bitbucket.sunrise.maneuver.game;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class RocketSpawner {
     }
     public void spawn() {
         Vector2 distVector = new Vector2(distance, 0);
-        distVector.setToRandomDirection();
+        distVector.rotate(MathUtils.random(360));
         final GameWorld.GameBody rocket = plane.getWorld().addRectangularBody(
                 new Vector2(plane.getPosition()).add(distVector),
                 width,
