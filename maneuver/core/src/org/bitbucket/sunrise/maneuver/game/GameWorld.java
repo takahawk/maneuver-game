@@ -163,7 +163,8 @@ public class GameWorld {
     public void update(float delta) {
         world.step(1 / 60f, 6, 3);
         for (GameBody body : gameBodies.values()) {
-            body.updateListener.update(delta);
+            if (body.updateListener != null)
+                body.updateListener.update(delta);
         }
     }
 

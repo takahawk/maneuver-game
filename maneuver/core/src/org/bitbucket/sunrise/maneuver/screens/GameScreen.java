@@ -34,7 +34,7 @@ import java.util.List;
 public class GameScreen implements Screen {
     private static final float ROCKET_FORCE = 1000f;
     private static final float ROCKET_SPAWN_FREQ = 5f;
-    private static final float ROCKET_DISTANCE = 100f;
+    private static final float ROCKET_DISTANCE = 1000f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
@@ -70,13 +70,24 @@ public class GameScreen implements Screen {
                 rocketTexture.getRegionWidth(),
                 rocketTexture.getRegionHeight()
         );
-        rocket = world.addRectangularBody(
-                new Vector2(200, 100),
-                rocketTexture.getRegionWidth(),
-                rocketTexture.getRegionHeight()
-        );
+        rocketSpawner.addSpawnListener(new RocketSpawner.SpawnListener() {
+            @Override
+            public void spawned(GameWorld.GameBody rocket) {
+                stage.addActor(new PhysicsActor(rocket, rocketTexture));
+                world.addContactHandler(plane, rocket, new GameWorld.ContactListener() {
+                    @Override
+                    public void beginContact() {
+                        System.out.println("KABOOM!");
+                    }
+
+                    @Override
+                    public void endContact() {
+
+                    }
+                });
+            }
+        });
         stage.addActor(new PhysicsActor(plane, planeTexture));
-        stage.addActor(new PhysicsActor(rocket, rocketTexture));
         Actor backgroundActor = new Actor() {
 
             @Override
@@ -88,17 +99,7 @@ public class GameScreen implements Screen {
         backgroundActor.toBack();
         cam = (OrthographicCamera) stage.getViewport().getCamera();
 
-        world.addContactHandler(plane, rocket, new GameWorld.ContactListener() {
-            @Override
-            public void beginContact() {
-                System.out.println("KABOOM!");
-            }
 
-            @Override
-            public void endContact() {
-
-            }
-        });
     }
 
     public void handleInput() {
@@ -129,11 +130,8 @@ public class GameScreen implements Screen {
     }
 
     public void update(float delta) {
-        world.update();
-        rocket.applyForce(
-                plane.getPosition().sub(rocket.getPosition()).setLength(ROCKET_FORCE),
-                true
-        );
+        rocketSpawner.update(delta);
+        world.update(delta);
         updateCam();
     }
 

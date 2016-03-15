@@ -16,7 +16,7 @@ public class RocketSpawner {
     private float height;
     private float elapsedTime = 0;
     private List<SpawnListener> spawnListeners = new ArrayList<SpawnListener>();
-    private Vector2 rocketForce;
+    private float rocketForce;
 
     public interface SpawnListener {
         void spawned(GameWorld.GameBody rocket);
@@ -27,7 +27,7 @@ public class RocketSpawner {
             GameWorld.GameBody plane,
             float frequency,
             float distance,
-            Vector2 rocketForce,
+            float rocketForce,
             float width,
             float height
         ) {
@@ -50,12 +50,20 @@ public class RocketSpawner {
     }
     public void spawn() {
         Vector2 distVector = new Vector2(distance, 0).setToRandomDirection();
-        GameWorld.GameBody rocket = plane.getWorld().addRectangularBody(
+        final GameWorld.GameBody rocket = plane.getWorld().addRectangularBody(
                 plane.getPosition().add(distVector),
                 width,
                 height
         );
-
+        rocket.setUpdateListener(new GameWorld.UpdateListener() {
+            @Override
+            public void update(float delta) {
+                rocket.applyForce(
+                        plane.getPosition().sub(rocket.getPosition()).setLength(rocketForce),
+                        true
+                );
+            }
+        });
         for (SpawnListener l : spawnListeners) {
             l.spawned(rocket);
         }
