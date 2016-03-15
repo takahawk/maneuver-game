@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -44,17 +45,28 @@ public class GameScreen implements Screen {
     private OrthographicCamera cam;
     private Queue<GameWorld.GameBody> bodiesToBeRemoved = new ArrayDeque<GameWorld.GameBody>();
 
+    private PhysicsActor planeActor;
     private SpriteBatch batch;
-    private TextureRegion rocketTexture = new TextureRegion(new Texture(Gdx.files.internal("rocket.png")));
-    private TextureRegion planeTexture = new TextureRegion(new Texture(Gdx.files.internal("plane.png")));
+    private Animation rocketAnimation = new Animation(
+            0.5f,
+            new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/1.png"))),
+            new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/2.png"))),
+            new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/3.png")))
+    );
+    private TextureRegion planeTexture = new TextureRegion(new Texture(Gdx.files.internal("graphics/jet/plane.png")));
+    private Texture rightTurnTexture = new Texture(Gdx.files.internal("graphics/jet/right_turn.png"));
+    private Texture leftTurnTexture = new Texture(Gdx.files.internal("graphics/jet/left_turn.png"));
     private Texture background = new Texture(Gdx.files.internal("background.png"));
 
+
+    private Sound rocketSound = Gdx.audio.newSound(Gdx.files.internal("sounds/boom/rocket.mp3"));
     private Sound boomSound = Gdx.audio.newSound(Gdx.files.internal("sounds/boom/short explosion.mp3"));
     private Music planeSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/uniform_noise.mp3"));
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
 
     public GameScreen(SpriteBatch batch) {
         planeSound.setVolume(0.3f);
+        rotationSound.setVolume(0.5f);
         this.batch = batch;
         world = new GameWorld(new Vector2(0, 0), 0.01f);
         debugRenderer = world.getDebugRenderer();
@@ -69,13 +81,14 @@ public class GameScreen implements Screen {
                 ROCKET_SPAWN_FREQ,
                 ROCKET_DISTANCE,
                 ROCKET_FORCE,
-                rocketTexture.getRegionWidth(),
-                rocketTexture.getRegionHeight()
+                rocketAnimation.getKeyFrame(1).getRegionWidth(),
+                rocketAnimation.getKeyFrame(1).getRegionHeight()
         );
         rocketSpawner.addSpawnListener(new RocketSpawner.SpawnListener() {
             @Override
             public void spawned(final GameWorld.GameBody rocket) {
-                final Actor rocketActor = new PhysicsActor(rocket, rocketTexture);
+                rocketSound.play();
+                final Actor rocketActor = new PhysicsActor(rocket, rocketAnimation);
                 stage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
                     @Override
@@ -99,7 +112,9 @@ public class GameScreen implements Screen {
                 });
             }
         });
-        final Actor planeActor = new PhysicsActor(plane, planeTexture);
+        planeActor = new PhysicsActor(plane, planeTexture);
+        planeActor.addTexture("right", rightTurnTexture);
+        planeActor.addTexture("left", leftTurnTexture);
         stage.addActor(planeActor);
         plane.setDestroyListener(new GameWorld.DestroyListener() {
             @Override
@@ -163,10 +178,13 @@ public class GameScreen implements Screen {
             // sound.play();
             plane.rotateVelocity(1f);
             System.out.println(getCameraAngle(cam));
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            planeActor.setCurrentAnimation("left");
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             plane.rotateVelocity(-1f);
             System.out.println(getCameraAngle(cam));
+            planeActor.setCurrentAnimation("right");
+        } else {
+            planeActor.setCurrentAnimation("default");
         }
     }
 

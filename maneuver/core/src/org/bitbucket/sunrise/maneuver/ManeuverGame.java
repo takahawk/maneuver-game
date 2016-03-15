@@ -16,7 +16,6 @@ public class ManeuverGame extends Game {
 	public void create () {
 		batch = new SpriteBatch();
 		setScreen(new GameScreen(batch));
-		img = new Texture("badlogic.jpg");
 	}
 
 	@Override
