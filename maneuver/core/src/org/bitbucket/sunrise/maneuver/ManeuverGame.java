@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.bitbucket.sunrise.maneuver.screens.GameScreen;
+import org.bitbucket.sunrise.maneuver.screens.MenuScreen;
 
 public class ManeuverGame extends Game {
 	SpriteBatch batch;
@@ -15,7 +16,8 @@ public class ManeuverGame extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		setScreen(new GameScreen(this, batch));
+		//setScreen(new GameScreen(this, batch));
+		setScreen(new MenuScreen(this));
 	}
 
 	@Override
