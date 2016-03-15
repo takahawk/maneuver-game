@@ -22,17 +22,24 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
 import org.bitbucket.sunrise.maneuver.game.Plane;
 import org.bitbucket.sunrise.maneuver.game.Rocket;
+import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
 import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by takahawk on 07.03.16.
  */
 public class GameScreen implements Screen {
     private static final float ROCKET_FORCE = 1000f;
+    private static final float ROCKET_SPAWN_FREQ = 5f;
+    private static final float ROCKET_DISTANCE = 100f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
-    private GameWorld.GameBody rocket;
+    private RocketSpawner rocketSpawner;
+    private List<GameWorld.GameBody> rockets = new ArrayList<GameWorld.GameBody>();
     private Stage stage = new Stage();
     private OrthographicCamera cam;
 
@@ -55,6 +62,11 @@ public class GameScreen implements Screen {
                 planeTexture.getRegionHeight()
         );
         plane.setLinearVelocity(0, 200);
+        rocketSpawner = new RocketSpawner(
+                plane,
+                ROCKET_SPAWN_FREQ,
+
+        )
         rocket = world.addRectangularBody(
                 new Vector2(200, 100),
                 rocketTexture.getRegionWidth(),
