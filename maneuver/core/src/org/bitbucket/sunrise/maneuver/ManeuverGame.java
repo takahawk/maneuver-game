@@ -15,7 +15,7 @@ public class ManeuverGame extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		setScreen(new GameScreen(batch));
+		setScreen(new GameScreen(this, batch));
 	}
 
 	@Override

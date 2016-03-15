@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
 import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
 import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by takahawk on 07.03.16.
@@ -64,7 +66,7 @@ public class GameScreen implements Screen {
     private Music planeSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/uniform_noise.mp3"));
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
 
-    public GameScreen(SpriteBatch batch) {
+    public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
         planeSound.setVolume(0.3f);
         rotationSound.setVolume(0.5f);
         this.batch = batch;
@@ -103,6 +105,24 @@ public class GameScreen implements Screen {
                         boomSound.play();
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    TimeUnit.SECONDS.sleep(3);
+                                    Gdx.app.postRunnable(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            maneuverGame.setScreen(new GameScreen(maneuverGame, batch));
+                                        }
+                                    });
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }).start();
+
                     }
 
                     @Override
@@ -220,8 +240,8 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.draw();
-        Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
-        debugRenderer.render(debugMatrix);
+        // Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
+        //debugRenderer.render(debugMatrix);
     }
 
     @Override
