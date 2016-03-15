@@ -28,7 +28,7 @@ import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
  * Created by takahawk on 07.03.16.
  */
 public class GameScreen implements Screen {
-    private static final float ROCKET_FORCE = 1000f;
+    private static final float ROCKET_FORCE = 100f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
@@ -86,11 +86,19 @@ public class GameScreen implements Screen {
         });
     }
 
+    public void handleTouch() {
+        if(Gdx.input.getX() < Gdx.graphics.getWidth() / 2) {
+            plane.rotateVelocity(1f);
+        }
+        if(Gdx.input.getX() > Gdx.graphics.getWidth() / 2) {
+            plane.rotateVelocity(-1f);
+        }
+    }
+
     public void handleInput() {
-        // Обработка нажатий
-        // Gdx.input.isTouched()
-        // Gdx.input.getX();
-        // Gdx.input.getY();
+        if(Gdx.input.isTouched()) {
+            handleTouch();
+        }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             // sound.play();
             plane.rotateVelocity(1f);
