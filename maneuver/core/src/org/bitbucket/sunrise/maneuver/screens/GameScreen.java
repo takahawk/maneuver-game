@@ -65,8 +65,11 @@ public class GameScreen implements Screen {
         rocketSpawner = new RocketSpawner(
                 plane,
                 ROCKET_SPAWN_FREQ,
-
-        )
+                ROCKET_DISTANCE,
+                ROCKET_FORCE,
+                rocketTexture.getRegionWidth(),
+                rocketTexture.getRegionHeight()
+        );
         rocket = world.addRectangularBody(
                 new Vector2(200, 100),
                 rocketTexture.getRegionWidth(),

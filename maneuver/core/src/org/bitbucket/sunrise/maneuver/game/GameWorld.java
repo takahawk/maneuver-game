@@ -53,7 +53,13 @@ public class GameWorld {
         void endContact();
     }
 
+    public interface UpdateListener {
+        void update(float delta);
+    }
+
     public class GameBody {
+        UpdateListener updateListener;
+
         Body body;
 
         public GameBody(Body body) {
@@ -97,6 +103,9 @@ public class GameWorld {
             body.setTransform(body.getPosition(), (angle - 90f) * MathUtils.degreesToRadians);
         }
 
+        public void setUpdateListener(UpdateListener updateListener) {
+            this.updateListener = updateListener;
+        }
         public float getVelocityAngle() {
             return body.getLinearVelocity().angle();
         }
@@ -151,8 +160,11 @@ public class GameWorld {
     public float getScale() {
         return scale;
     }
-    public void update() {
+    public void update(float delta) {
         world.step(1 / 60f, 6, 3);
+        for (GameBody body : gameBodies.values()) {
+            body.updateListener.update(delta);
+        }
     }
 
     public GameBody addRectangularBody(Vector2 position, float width, float height) {
