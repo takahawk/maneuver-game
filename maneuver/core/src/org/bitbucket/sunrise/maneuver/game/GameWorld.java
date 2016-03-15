@@ -57,9 +57,13 @@ public class GameWorld {
         void update(float delta);
     }
 
+    public interface DestroyListener {
+        void destroyed();
+    }
+
     public class GameBody {
         UpdateListener updateListener;
-
+        DestroyListener destroyListener;
         Body body;
 
         public GameBody(Body body) {
@@ -106,6 +110,11 @@ public class GameWorld {
         public void setUpdateListener(UpdateListener updateListener) {
             this.updateListener = updateListener;
         }
+
+        public void setDestroyListener(DestroyListener destroyListener) {
+            this.destroyListener = destroyListener;
+        }
+
         public float getVelocityAngle() {
             return body.getLinearVelocity().angle();
         }
@@ -115,6 +124,10 @@ public class GameWorld {
         }
 
         public Body getBody() {return this.body; }
+
+        public boolean isActive() {
+            return body.isActive();
+        }
 
     }
 
@@ -195,5 +208,7 @@ public class GameWorld {
 
     public void destroyBody(GameBody body) {
         world.destroyBody(body.getBody());
+        if (body.destroyListener != null)
+            body.destroyListener.destroyed();
     }
 }

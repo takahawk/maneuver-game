@@ -4,6 +4,8 @@ package org.bitbucket.sunrise.maneuver.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -31,7 +33,7 @@ import java.util.Queue;
 public class GameScreen implements Screen {
     private static final float ROCKET_SPAWN_FREQ = 5f;
     private static final float ROCKET_DISTANCE = 300f;
-    private static final float ROCKET_FORCE = 100f;
+    private static final float ROCKET_FORCE = 300f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
@@ -46,7 +48,12 @@ public class GameScreen implements Screen {
     private TextureRegion planeTexture = new TextureRegion(new Texture(Gdx.files.internal("plane.png")));
     private Texture background = new Texture(Gdx.files.internal("background.png"));
 
+    private Sound boomSound = Gdx.audio.newSound(Gdx.files.internal("sounds/boom/short explosion.mp3"));
+    private Music planeSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/uniform_noise.mp3"));
+    private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
+
     public GameScreen(SpriteBatch batch) {
+        planeSound.setVolume(0.5f);
         this.batch = batch;
         world = new GameWorld(new Vector2(0, 0), 0.01f);
         debugRenderer = world.getDebugRenderer();
@@ -67,11 +74,19 @@ public class GameScreen implements Screen {
         rocketSpawner.addSpawnListener(new RocketSpawner.SpawnListener() {
             @Override
             public void spawned(final GameWorld.GameBody rocket) {
-                stage.addActor(new PhysicsActor(rocket, rocketTexture));
+                final Actor rocketActor = new PhysicsActor(rocket, rocketTexture);
+                stage.addActor(rocketActor);
+                rocket.setDestroyListener(new GameWorld.DestroyListener() {
+                    @Override
+                    public void destroyed() {
+                        rocketActor.remove();
+                    }
+                });
                 world.addContactHandler(plane, rocket, new GameWorld.ContactListener() {
                     @Override
                     public void beginContact() {
                         System.out.println("KABOOM!");
+                        boomSound.play();
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
                     }
@@ -83,7 +98,14 @@ public class GameScreen implements Screen {
                 });
             }
         });
-        stage.addActor(new PhysicsActor(plane, planeTexture));
+        final Actor planeActor = new PhysicsActor(plane, planeTexture);
+        stage.addActor(planeActor);
+        plane.setDestroyListener(new GameWorld.DestroyListener() {
+            @Override
+            public void destroyed() {
+                planeActor.remove();
+            }
+        });
         Actor backgroundActor = new Actor() {
 
             @Override
@@ -94,6 +116,27 @@ public class GameScreen implements Screen {
         stage.addActor(backgroundActor);
         backgroundActor.toBack();
         cam = (OrthographicCamera) stage.getViewport().getCamera();
+    }
+
+    public void playSounds() {
+        if (plane.isActive()) {
+            if (!planeSound.isPlaying())
+                planeSound.play();
+        } else if (planeSound.isPlaying()) {
+            planeSound.stop();
+        }
+        if (isRotateControlPressed()) {
+            if (!rotationSound.isPlaying())
+                rotationSound.play();
+        } else if (rotationSound.isPlaying()) {
+            rotationSound.stop();
+        }
+    }
+
+    public boolean isRotateControlPressed() {
+        return  Gdx.input.isTouched() ||
+                Gdx.input.isKeyPressed(Input.Keys.LEFT) ||
+                Gdx.input.isKeyPressed(Input.Keys.RIGHT);
     }
 
     public void handleTouch() {
@@ -138,6 +181,7 @@ public class GameScreen implements Screen {
             world.destroyBody(bodiesToBeRemoved.poll());
         }
         updateCam();
+        playSounds();
     }
 
     @Override
