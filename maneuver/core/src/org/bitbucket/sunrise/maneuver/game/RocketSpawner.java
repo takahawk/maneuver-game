@@ -35,6 +35,8 @@ public class RocketSpawner {
         this.frequency = frequency;
         this.distance = distance;
         this.rocketForce = rocketForce;
+        this.width = width;
+        this.height = height;
     }
 
     public void addSpawnListener(SpawnListener listener) {
@@ -49,9 +51,10 @@ public class RocketSpawner {
         }
     }
     public void spawn() {
-        Vector2 distVector = new Vector2(distance, 0).setToRandomDirection();
+        Vector2 distVector = new Vector2(distance, 0);
+        distVector.setToRandomDirection();
         final GameWorld.GameBody rocket = plane.getWorld().addRectangularBody(
-                plane.getPosition().add(distVector),
+                new Vector2(plane.getPosition()).add(distVector),
                 width,
                 height
         );
