@@ -90,12 +90,30 @@ public class GameScreen implements Screen {
             @Override
             public void spawned(final GameWorld.GameBody rocket) {
                 rocketSound.play();
+                for (GameWorld.GameBody body : rockets) {
+                    final GameWorld.GameBody rocket2 = body;
+                    world.addContactHandler(rocket, rocket2, new GameWorld.ContactListener() {
+                        @Override
+                        public void beginContact() {
+                            boomSound.play();
+                            bodiesToBeRemoved.offer(rocket);
+                            bodiesToBeRemoved.offer(rocket2);
+                        }
+
+                        @Override
+                        public void endContact() {
+
+                        }
+                    });
+                }
+                rockets.add(rocket);
                 final Actor rocketActor = new PhysicsActor(rocket, rocketAnimation);
                 stage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
                     @Override
                     public void destroyed() {
                         rocketActor.remove();
+                        rockets.remove(rocket);
                     }
                 });
                 world.addContactHandler(plane, rocket, new GameWorld.ContactListener() {
