@@ -20,6 +20,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import org.bitbucket.sunrise.maneuver.ManeuverGame;
+import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
 import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
 import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
@@ -42,6 +43,7 @@ public class GameScreen implements Screen {
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
     private RocketSpawner rocketSpawner;
+    private ResourceManager resourceManager;
     private List<GameWorld.GameBody> rockets = new ArrayList<GameWorld.GameBody>();
     private Stage stage = new Stage();
     private OrthographicCamera cam;
@@ -55,7 +57,7 @@ public class GameScreen implements Screen {
             new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/2.png"))),
             new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/3.png")))
     );
-    private TextureRegion planeTexture = new TextureRegion(new Texture(Gdx.files.internal("graphics/jet/plane.png")));
+
     private Texture rightTurnTexture = new Texture(Gdx.files.internal("graphics/jet/right_turn.png"));
     private Texture leftTurnTexture = new Texture(Gdx.files.internal("graphics/jet/left_turn.png"));
     private Texture background = new Texture(Gdx.files.internal("background.png"));
@@ -66,12 +68,13 @@ public class GameScreen implements Screen {
     private Music planeSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/uniform_noise.mp3"));
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
 
-    public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
+    public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch, final ResourceManager resourceManager) {
         planeSound.setVolume(0.3f);
         rotationSound.setVolume(0.5f);
         this.batch = batch;
         world = new GameWorld(new Vector2(0, 0), 0.01f);
         debugRenderer = world.getDebugRenderer();
+        TextureRegion planeTexture = resourceManager.getRegion("graphics/jet/plane.png");
         plane = world.addRectangularBody(
                 new Vector2(400, 300),
                 planeTexture.getRegionWidth(),
@@ -131,7 +134,7 @@ public class GameScreen implements Screen {
                                     Gdx.app.postRunnable(new Runnable() {
                                         @Override
                                         public void run() {
-                                            maneuverGame.setScreen(new GameScreen(maneuverGame, batch));
+                                            maneuverGame.setScreen(new GameScreen(maneuverGame, batch, resourceManager));
                                         }
                                     });
                                 } catch (InterruptedException e) {
@@ -151,8 +154,8 @@ public class GameScreen implements Screen {
             }
         });
         planeActor = new PhysicsActor(plane, planeTexture);
-        planeActor.addTexture("right", rightTurnTexture);
-        planeActor.addTexture("left", leftTurnTexture);
+        planeActor.addTexture("right", resourceManager.getTexture("graphics/jet/right_turn.png"));
+        planeActor.addTexture("left", resourceManager.getTexture("graphics/jet/left_turn.png"));
         stage.addActor(planeActor);
         plane.setDestroyListener(new GameWorld.DestroyListener() {
             @Override
@@ -166,15 +169,12 @@ public class GameScreen implements Screen {
                     new TextureRegion(background),
                     new Vector2(0, 0)
         );
-//        new Actor() {
-//
-//            @Override
-//            public void draw(Batch batch, float parentAlpha) {
-//                batch.draw(background, getX(), getY(), background.getWidth(), background.getHeight());
-//            }
-//        };
         stage.addActor(backgroundActor);
         backgroundActor.toBack();
+
+    }
+
+    public void initResources() {
 
     }
 
