@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -41,6 +42,7 @@ public class GameScreen implements Screen {
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
     private RocketSpawner rocketSpawner;
+    private ManeuverGame maneuverGame;
     private ResourceManager resourceManager;
     private List<GameWorld.GameBody> rockets = new ArrayList<GameWorld.GameBody>();
 
@@ -48,7 +50,10 @@ public class GameScreen implements Screen {
             ManeuverGame.WIDTH,
             (int) (ManeuverGame.WIDTH / ManeuverGame.RATIO)
         );
-    private Viewport hudViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    private Viewport hudViewport = new FitViewport(
+            ManeuverGame.WIDTH,
+            (int) (ManeuverGame.WIDTH / ManeuverGame.RATIO)
+    );
     private Stage stage = new Stage(stageViewport);
     private Stage hud = new Stage(hudViewport);
     private OrthographicCamera cam;
@@ -75,10 +80,11 @@ public class GameScreen implements Screen {
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
     private final BitmapFont font = new BitmapFont();
     private static volatile float time = 0;
-    private static Thread timeThread = null;
+    private boolean isGameOver = false;
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
 
+        this.maneuverGame = maneuverGame;
         resourceManager = maneuverGame.getResourceManager();
         initResources();
         font.setColor(1,0,0,1);
@@ -147,24 +153,7 @@ public class GameScreen implements Screen {
                         System.out.println("KABOOM!");
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    TimeUnit.SECONDS.sleep(3);
-                                    Gdx.app.postRunnable(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            maneuverGame.setScreen(new GameScreen(maneuverGame, batch));
-                                        }
-                                    });
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-                        }).start();
-
+                        isGameOver = true;
                     }
 
                     @Override
@@ -197,7 +186,6 @@ public class GameScreen implements Screen {
         stage.addActor(backgroundActor);
         backgroundActor.toBack();
         initHud();
-
     }
 
     private void initHud() {
@@ -325,6 +313,9 @@ public class GameScreen implements Screen {
         stage.draw();
         hud.act();
         hud.draw();
+        if(isGameOver) {
+            maneuverGame.setScreen(new GameOverScreen(maneuverGame));
+        }
         Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
         debugRenderer.render(debugMatrix);
     }
