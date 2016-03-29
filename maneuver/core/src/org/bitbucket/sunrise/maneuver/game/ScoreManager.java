@@ -2,17 +2,20 @@ package org.bitbucket.sunrise.maneuver.game;
 
 import com.badlogic.gdx.Preferences;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
 /**
  * Created by takahawk on 29.03.16.
  */
-public class ScoreManager {
+public final class ScoreManager {
     private static final int SCORES_COUNT = 3;
     private Preferences appPrefs;
     private ScoreResult[] scores = new ScoreResult[SCORES_COUNT];
 
-    private class ScoreResult {
-        public int score;
-        public String name;
+    public class ScoreResult {
+        public final int score;
+        public final String name;
 
         public ScoreResult(String name, int score) {
             this.name = name;
@@ -44,6 +47,26 @@ public class ScoreManager {
                 return;
             }
         }
+    }
+
+    public Iterable<ScoreResult> getScores() {
+        return new Iterable<ScoreResult>() {
+            @Override
+            public Iterator<ScoreResult> iterator() {
+                return new Iterator<ScoreResult>() {
+                    int index = -1;
+                    @Override
+                    public boolean hasNext() {
+                        return (++index) < scores.length;
+                    }
+
+                    @Override
+                    public ScoreResult next() {
+                        return scores[index];
+                    }
+                };
+            }
+        };
     }
 
     private void invalidateResults() {

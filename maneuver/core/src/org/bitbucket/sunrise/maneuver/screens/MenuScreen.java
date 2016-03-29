@@ -32,10 +32,13 @@ public class MenuScreen implements Screen {
 
         createBasicSkin();
         final TextButton newGameButton = new TextButton("new game", skin); // Use the initialized skin
+        final TextButton scoresButton = new TextButton("high scores", skin);
         final TextButton exitGameButton = new TextButton("exit", skin);
         newGameButton.setPosition(Gdx.graphics.getWidth()/2 - Gdx.graphics.getWidth()/8 , Gdx.graphics.getHeight()/2);
-        exitGameButton.setPosition(Gdx.graphics.getWidth()/2 - Gdx.graphics.getWidth()/8 , newGameButton.getY()- newGameButton.getHeight()- 5.f );
+        scoresButton.setPosition(Gdx.graphics.getWidth()/2 - Gdx.graphics.getWidth()/8 , newGameButton.getY() - newGameButton.getHeight() - 5.f );
+        exitGameButton.setPosition(Gdx.graphics.getWidth()/2 - Gdx.graphics.getWidth()/8 , scoresButton.getY() - scoresButton.getHeight() - 5.f );
         stage.addActor(newGameButton);
+        stage.addActor(scoresButton);
         stage.addActor(exitGameButton);
 
         newGameButton.addListener(new ChangeListener() {
@@ -44,6 +47,12 @@ public class MenuScreen implements Screen {
             }
         });
 
+        scoresButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                mGame.setScreen(new ScoreScreen(mGame));
+            }
+        });
         exitGameButton.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
                 Gdx.app.exit();

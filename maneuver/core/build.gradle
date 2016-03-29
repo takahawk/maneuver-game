@@ -5,7 +5,9 @@ sourceCompatibility = 1.6
 
 sourceSets.main.java.srcDirs = [ "src/" ]
 
-
+dependencies {
+    compile "com.kotcrab.vis:vis-ui:$visuiVersion"
+}
 eclipse.project {
     name = appName + "-core"
 }
