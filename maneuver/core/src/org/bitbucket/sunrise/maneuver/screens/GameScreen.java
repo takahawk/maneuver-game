@@ -3,6 +3,7 @@ package org.bitbucket.sunrise.maneuver.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -38,7 +39,6 @@ public class GameScreen implements Screen {
     private ManeuverGame maneuverGame;
     private static final float ROCKET_SPAWN_FREQ = 5f;
     private static final float ROCKET_DISTANCE = 500f;
-    private static final float ROCKET_FORCE = 300f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
@@ -81,6 +81,7 @@ public class GameScreen implements Screen {
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
         this.maneuverGame = maneuverGame;
+        Preferences preferences = maneuverGame.getPreferences();
         resourceManager = maneuverGame.getResourceManager();
         initResources();
         font.setColor(1,0,0,1);
@@ -96,15 +97,15 @@ public class GameScreen implements Screen {
                 planeTexture.getRegionWidth(),
                 planeTexture.getRegionHeight()
         );
-        plane.setLinearVelocity(0, 200);
+        plane.setLinearVelocity(0, preferences.getFloat("planeSpeed"));
         rocketSpawner = new RocketSpawner(
                 plane,
                 ROCKET_SPAWN_FREQ,
                 ROCKET_DISTANCE,
-                ROCKET_FORCE,
+                preferences.getFloat("rocketSpeed"),
                 rocketAnimation.getKeyFrame(1).getRegionWidth(),
                 rocketAnimation.getKeyFrame(1).getRegionHeight(),
-                2
+                preferences.getFloat("rocketResource")
         );
         rocketSpawner.addSpawnListener(new RocketSpawner.SpawnListener() {
             Map<GameWorld.GameBody, PhysicsActor> rocketActors = new HashMap<GameWorld.GameBody, PhysicsActor>();

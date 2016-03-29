@@ -10,7 +10,7 @@ import java.util.List;
  * Created by takahawk on 15.03.16.
  */
 public class RocketSpawner {
-    public static final float DEPLETED_MISSILE_LIFETIME = 3;
+    public static final float DEPLETED_MISSILE_LIFETIME = 2;
     private GameWorld.GameBody plane;
     private float frequency;
     private float distance;
