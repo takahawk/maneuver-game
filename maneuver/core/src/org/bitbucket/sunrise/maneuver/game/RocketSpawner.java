@@ -10,7 +10,7 @@ import java.util.List;
  * Created by takahawk on 15.03.16.
  */
 public class RocketSpawner {
-    public static final float DEPLETED_MISSILE_LIFETIME = 2;
+    public static final float DEPLETED_MISSILE_LIFETIME = 3;
     private GameWorld.GameBody plane;
     private float frequency;
     private float distance;
@@ -58,7 +58,10 @@ public class RocketSpawner {
     }
     public void spawn() {
         Vector2 distVector = new Vector2(distance, 0);
-        distVector.rotate(MathUtils.random(360));
+        distVector.rotate(MathUtils.random(
+                plane.getVelocityAngle() - 90 + 270,
+                plane.getVelocityAngle() - 90 + 300
+        ));
         final GameWorld.GameBody rocket = plane.getWorld().addRectangularBody(
                 new Vector2(plane.getPosition()).add(distVector),
                 width,
@@ -68,16 +71,22 @@ public class RocketSpawner {
             float resource = resourceTime;
             @Override
             public void update(float delta) {
+                if (!rocket.isActive())
+                    return;
                 resource -= delta;
                 if (resource > 0) {
                     rocket.applyForce(
                             plane.getPosition().sub(rocket.getPosition()).setLength(rocketForce),
                             true
                     );
-                } else if (resource < DEPLETED_MISSILE_LIFETIME) {
+                } else if (resource < -DEPLETED_MISSILE_LIFETIME) {
                     GameWorld world = rocket.getWorld();
                     if (rocket.isActive())
                         world.destroyBody(rocket);
+                } else {
+                    for (SpawnListener listener : spawnListeners) {
+                        listener.depleted(rocket);
+                    }
                 }
             }
         });

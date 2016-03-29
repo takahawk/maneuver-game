@@ -47,11 +47,12 @@ public class PhysicsActor extends Actor {
 
     public void setCurrentAnimation(String name) {
         currentAnimation = animations.get(name);
+        elapsedTime = 0;
     }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        TextureRegion texture = currentAnimation.getKeyFrame(elapsedTime, true);
+        TextureRegion texture = currentAnimation.getKeyFrame(elapsedTime, currentAnimation.getPlayMode() == Animation.PlayMode.LOOP);
         batch.draw(
                 texture,
                 gameBody.getPosition().x - texture.getRegionWidth() / 2,

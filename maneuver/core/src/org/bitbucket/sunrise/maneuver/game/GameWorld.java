@@ -62,9 +62,10 @@ public class GameWorld {
     }
 
     public class GameBody {
-        UpdateListener updateListener;
-        DestroyListener destroyListener;
-        Body body;
+        private UpdateListener updateListener;
+        private DestroyListener destroyListener;
+        private Body body;
+        private boolean alive = true;
 
         public GameBody(Body body) {
             this.body = body;
@@ -126,7 +127,7 @@ public class GameWorld {
         public Body getBody() {return this.body; }
 
         public boolean isActive() {
-            return body.isActive();
+            return alive;
         }
 
     }
@@ -207,8 +208,11 @@ public class GameWorld {
     }
 
     public void destroyBody(GameBody body) {
-        world.destroyBody(body.getBody());
-        if (body.destroyListener != null)
-            body.destroyListener.destroyed();
+        if (body.alive) {
+            world.destroyBody(body.getBody());
+            if (body.destroyListener != null)
+                body.destroyListener.destroyed();
+            body.alive = false;
+        }
     }
 }

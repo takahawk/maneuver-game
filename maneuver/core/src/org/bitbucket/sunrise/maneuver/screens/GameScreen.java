@@ -28,10 +28,7 @@ import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
 import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
 import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,12 +73,13 @@ public class GameScreen implements Screen {
     private static Thread timeThread = null;
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
+
         resourceManager = maneuverGame.getResourceManager();
         initResources();
         font.setColor(1,0,0,1);
         time = 0;
-        planeSound.setVolume(0.3f);
-        rotationSound.setVolume(0.5f);
+        planeSound.setVolume(0.05f);
+        rotationSound.setVolume(0.05f);
         this.batch = batch;
         world = new GameWorld(new Vector2(0, 0), 0.01f);
         debugRenderer = world.getDebugRenderer();
@@ -102,7 +100,7 @@ public class GameScreen implements Screen {
                 2
         );
         rocketSpawner.addSpawnListener(new RocketSpawner.SpawnListener() {
-            PhysicsActor rocketActor;
+            Map<GameWorld.GameBody, PhysicsActor> rocketActors = new HashMap<GameWorld.GameBody, PhysicsActor>();
 
             @Override
             public void spawned(final GameWorld.GameBody rocket) {
@@ -124,14 +122,17 @@ public class GameScreen implements Screen {
                     });
                 }
                 rockets.add(rocket);
-                rocketActor = new PhysicsActor(rocket, rocketAnimation);
+                final PhysicsActor rocketActor = new PhysicsActor(rocket, rocketAnimation);
+                rocketActors.put(rocket, rocketActor);
                 rocketActor.addAnimation("depleted", rocketDepletedAnimation);
+                rocketSound.play(0.05f);
                 stage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
                     @Override
                     public void destroyed() {
                         rocketActor.remove();
                         rockets.remove(rocket);
+                        rocketActors.remove(rocket);
                         boomSound.play();
                     }
                 });
@@ -139,7 +140,6 @@ public class GameScreen implements Screen {
                     @Override
                     public void beginContact() {
                         System.out.println("KABOOM!");
-
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
                         new Thread(new Runnable() {
@@ -170,7 +170,7 @@ public class GameScreen implements Screen {
 
             @Override
             public void depleted(GameWorld.GameBody rocket) {
-                rocketActor.setCurrentAnimation("depleted");
+                rocketActors.get(rocket).setCurrentAnimation("depleted");
             }
         });
         planeActor = new PhysicsActor(plane, planeTexture);
@@ -214,9 +214,9 @@ public class GameScreen implements Screen {
 
     public void initResources() {
         rocketDepletedAnimation = new Animation(
-                0.2f,
+                0.01f,
                 new Array<TextureRegion>(
-                        new TextureRegion[]{
+                        new TextureRegion[] {
                                 resourceManager.getRegion("graphics/depleted_missile/Missile00.png"),
                                 resourceManager.getRegion("graphics/depleted_missile/Missile01.png"),
                                 resourceManager.getRegion("graphics/depleted_missile/Missile02.png"),
@@ -287,9 +287,9 @@ public class GameScreen implements Screen {
     }
 
     private void updateCam() {
-        cam.position.x = plane.getPosition().x;
-        cam.position.y = plane.getPosition().y;
-        cam.rotate(180f - plane.getVelocityAngle() - 90f - getCameraAngle(cam));
+        cam.position.x = plane.getPosition().x ;
+        cam.position.y = plane.getPosition().y ;
+        cam.rotate(90f - getCameraAngle(cam) - plane.getVelocityAngle());
         cam.update();
     }
 
@@ -315,11 +315,12 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        stage.act();
         stage.draw();
         hud.act();
         hud.draw();
-        // Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
-        //debugRenderer.render(debugMatrix);
+        Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
+        debugRenderer.render(debugMatrix);
     }
 
     @Override
