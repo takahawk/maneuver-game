@@ -10,15 +10,16 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
 import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
@@ -46,6 +47,7 @@ public class GameScreen implements Screen {
     private ResourceManager resourceManager;
     private List<GameWorld.GameBody> rockets = new ArrayList<GameWorld.GameBody>();
     private Stage stage = new Stage();
+    private Stage hud = new Stage();
     private OrthographicCamera cam;
     private Queue<GameWorld.GameBody> bodiesToBeRemoved = new ArrayDeque<GameWorld.GameBody>();
 
@@ -67,9 +69,14 @@ public class GameScreen implements Screen {
     private Sound boomSound = Gdx.audio.newSound(Gdx.files.internal("sounds/boom/short explosion.mp3"));
     private Music planeSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/uniform_noise.mp3"));
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
+    private final BitmapFont font = new BitmapFont();
+    private static volatile float time = 0;
+    private static Thread timeThread = null;
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
         resourceManager = maneuverGame.getResourceManager();
+        font.setColor(1,0,0,1);
+        time = 0;
         planeSound.setVolume(0.3f);
         rotationSound.setVolume(0.5f);
         this.batch = batch;
@@ -172,7 +179,25 @@ public class GameScreen implements Screen {
         );
         stage.addActor(backgroundActor);
         backgroundActor.toBack();
+        initHud();
 
+    }
+
+    private void initHud() {
+        Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+        Table table = new Table();
+        table.setFillParent(true);
+        table.add(new Label("Time: ", skin) {
+
+            @Override
+            public void act(float delta) {
+                setText("Time: " + time);
+            }
+        }).expandX().align(Align.right).pad(20);
+        table.row();
+        table.add().expandY();
+        table.row();
+        hud.addActor(table);
     }
 
     public void initResources() {
@@ -254,11 +279,15 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        time += delta;
         handleInput();
         update(delta);
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         stage.draw();
+        hud.act();
+        hud.draw();
         // Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
         //debugRenderer.render(debugMatrix);
     }
