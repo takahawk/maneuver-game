@@ -6,10 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
@@ -21,6 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
@@ -36,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class GameScreen implements Screen {
     private static final float ROCKET_SPAWN_FREQ = 5f;
-    private static final float ROCKET_DISTANCE = 300f;
+    private static final float ROCKET_DISTANCE = 500f;
     private static final float ROCKET_FORCE = 300f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
@@ -44,8 +43,14 @@ public class GameScreen implements Screen {
     private RocketSpawner rocketSpawner;
     private ResourceManager resourceManager;
     private List<GameWorld.GameBody> rockets = new ArrayList<GameWorld.GameBody>();
-    private Stage stage = new Stage();
-    private Stage hud = new Stage();
+
+    private Viewport stageViewport = new FitViewport(
+            ManeuverGame.WIDTH,
+            (int) (ManeuverGame.WIDTH / ManeuverGame.RATIO)
+        );
+    private Viewport hudViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    private Stage stage = new Stage(stageViewport);
+    private Stage hud = new Stage(hudViewport);
     private OrthographicCamera cam;
     private Queue<GameWorld.GameBody> bodiesToBeRemoved = new ArrayDeque<GameWorld.GameBody>();
 
@@ -61,7 +66,7 @@ public class GameScreen implements Screen {
 
     private Texture rightTurnTexture = new Texture(Gdx.files.internal("graphics/jet/right_turn.png"));
     private Texture leftTurnTexture = new Texture(Gdx.files.internal("graphics/jet/left_turn.png"));
-    private Texture background = new Texture(Gdx.files.internal("background.png"));
+    private Texture background;
 
 
     private Sound rocketSound = Gdx.audio.newSound(Gdx.files.internal("sounds/boom/rocket.mp3"));
@@ -232,6 +237,7 @@ public class GameScreen implements Screen {
                 ),
                 Animation.PlayMode.NORMAL
         );
+        background = new Texture(Gdx.files.internal("background.png"));
     }
 
     public void playSounds() {
@@ -325,6 +331,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        stageViewport.update(width, height);
+        hudViewport.update(width, height);
     }
 
     @Override
