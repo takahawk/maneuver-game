@@ -16,6 +16,7 @@ public class RocketSpawner {
     private float width;
     private float height;
     private float elapsedTime = 0;
+    private float resourceTime;
     private List<SpawnListener> spawnListeners = new ArrayList<SpawnListener>();
     private float rocketForce;
 
@@ -30,7 +31,8 @@ public class RocketSpawner {
             float distance,
             float rocketForce,
             float width,
-            float height
+            float height,
+            float resourceTime
         ) {
         this.plane = plane;
         this.frequency = frequency;
@@ -38,6 +40,7 @@ public class RocketSpawner {
         this.rocketForce = rocketForce;
         this.width = width;
         this.height = height;
+        this.resourceTime = resourceTime;
     }
 
     public void addSpawnListener(SpawnListener listener) {

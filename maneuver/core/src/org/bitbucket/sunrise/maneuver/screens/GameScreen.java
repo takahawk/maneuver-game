@@ -191,7 +191,7 @@ public class GameScreen implements Screen {
 
             @Override
             public void act(float delta) {
-                setText("Time: " + time);
+                setText("Score: " + (int)(time * 100));
             }
         }).expandX().align(Align.right).pad(20);
         table.row();
