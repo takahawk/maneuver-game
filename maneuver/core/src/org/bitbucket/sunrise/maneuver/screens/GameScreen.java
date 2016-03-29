@@ -24,6 +24,7 @@ import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
 import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
+import org.bitbucket.sunrise.maneuver.game.ScoreManager;
 import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
 import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
 
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  * Created by takahawk on 07.03.16.
  */
 public class GameScreen implements Screen {
+    private ManeuverGame maneuverGame;
     private static final float ROCKET_SPAWN_FREQ = 5f;
     private static final float ROCKET_DISTANCE = 500f;
     private static final float ROCKET_FORCE = 300f;
@@ -78,7 +80,7 @@ public class GameScreen implements Screen {
     private static Thread timeThread = null;
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
-
+        this.maneuverGame = maneuverGame;
         resourceManager = maneuverGame.getResourceManager();
         initResources();
         font.setColor(1,0,0,1);
@@ -145,6 +147,7 @@ public class GameScreen implements Screen {
                     @Override
                     public void beginContact() {
                         System.out.println("KABOOM!");
+                        maneuverGame.getScoreManager().addScore("Player", (int) (time * 100));
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
                         new Thread(new Runnable() {
@@ -204,6 +207,14 @@ public class GameScreen implements Screen {
         Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
         Table table = new Table();
         table.setFillParent(true);
+        table.add(new Label("", skin) {
+
+            @Override
+            public void act(float delta) {
+                int score = (int) (time * 100);
+                setText("HIGHSCORE: " + Math.max(score, maneuverGame.getScoreManager().highResult()));
+            }
+        }).align(Align.left);
         table.add(new Label("Time: ", skin) {
 
             @Override

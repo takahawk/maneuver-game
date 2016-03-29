@@ -38,8 +38,8 @@ public final class ScoreManager {
 
     public void addScore(String name, int score) {
         for (int i = 0; i < scores.length; i++) {
-            if (score > scores[i].score) {
-                for (int j = i + 1; j < scores.length; j++) {
+            if (scores[i] == null || score > scores[i].score) {
+                for (int j = scores.length - 1; j > i; j--) {
                     scores[j] = scores[j - 1];
                 }
                 scores[i] = new ScoreResult(name, score);
@@ -47,6 +47,10 @@ public final class ScoreManager {
                 return;
             }
         }
+    }
+
+    public int highResult() {
+        return (scores[0] != null) ? scores[0].score : 0;
     }
 
     public Iterable<ScoreResult> getScores() {
@@ -71,8 +75,10 @@ public final class ScoreManager {
 
     private void invalidateResults() {
         for (int i = 0; i < scores.length; i++) {
-            appPrefs.putString("scoreName" + (i + 1), scores[i].name);
-            appPrefs.putInteger("scoreResult" + (i + 1), scores[i].score);
+            if (scores[i] != null) {
+                appPrefs.putString("scoreName" + (i + 1), scores[i].name);
+                appPrefs.putInteger("scoreResult" + (i + 1), scores[i].score);
+            }
         }
         appPrefs.flush();
     }

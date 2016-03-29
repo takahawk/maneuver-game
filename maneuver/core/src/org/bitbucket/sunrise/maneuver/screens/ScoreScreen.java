@@ -53,6 +53,7 @@ public class ScoreScreen implements Screen {
             table.add(new VisLabel(sr.name));
             table.add(new VisLabel(Integer.toString(sr.score))).padLeft(100);
             table.row();
+            number++;
         }
         VisTextButton toMenu = new VisTextButton("MENU");
         toMenu.addListener(new ClickListener() {
