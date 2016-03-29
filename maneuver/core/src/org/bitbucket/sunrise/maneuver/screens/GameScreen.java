@@ -20,6 +20,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
@@ -38,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class GameScreen implements Screen {
     private static final float ROCKET_SPAWN_FREQ = 5f;
-    private static final float ROCKET_DISTANCE = 300f;
+    private static final float ROCKET_DISTANCE = 500f;
     private static final float ROCKET_FORCE = 300f;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
@@ -46,8 +50,11 @@ public class GameScreen implements Screen {
     private RocketSpawner rocketSpawner;
     private ResourceManager resourceManager;
     private List<GameWorld.GameBody> rockets = new ArrayList<GameWorld.GameBody>();
-    private Stage stage = new Stage();
-    private Stage hud = new Stage();
+
+    private Viewport stageViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    private Viewport hudViewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    private Stage stage = new Stage(stageViewport);
+    private Stage hud = new Stage(hudViewport);
     private OrthographicCamera cam;
     private Queue<GameWorld.GameBody> bodiesToBeRemoved = new ArrayDeque<GameWorld.GameBody>();
 
@@ -296,6 +303,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        stageViewport.update(width, height);
+        hudViewport.update(width, height);
     }
 
     @Override
