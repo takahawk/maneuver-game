@@ -10,6 +10,7 @@ import java.util.List;
  * Created by takahawk on 15.03.16.
  */
 public class RocketSpawner {
+    public static final float DEPLETED_MISSILE_LIFETIME = 2;
     private GameWorld.GameBody plane;
     private float frequency;
     private float distance;
@@ -22,6 +23,7 @@ public class RocketSpawner {
 
     public interface SpawnListener {
         void spawned(GameWorld.GameBody rocket);
+        void depleted(GameWorld.GameBody rocket);
     }
 
 
@@ -63,12 +65,20 @@ public class RocketSpawner {
                 height
         );
         rocket.setUpdateListener(new GameWorld.UpdateListener() {
+            float resource = resourceTime;
             @Override
             public void update(float delta) {
-                rocket.applyForce(
-                        plane.getPosition().sub(rocket.getPosition()).setLength(rocketForce),
-                        true
-                );
+                resource -= delta;
+                if (resource > 0) {
+                    rocket.applyForce(
+                            plane.getPosition().sub(rocket.getPosition()).setLength(rocketForce),
+                            true
+                    );
+                } else if (resource < DEPLETED_MISSILE_LIFETIME) {
+                    GameWorld world = rocket.getWorld();
+                    if (rocket.isActive())
+                        world.destroyBody(rocket);
+                }
             }
         });
         for (SpawnListener l : spawnListeners) {

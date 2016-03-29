@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
@@ -59,6 +60,7 @@ public class GameScreen implements Screen {
             new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/2.png"))),
             new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/3.png")))
     );
+    private Animation rocketDepletedAnimation;
 
     private Texture rightTurnTexture = new Texture(Gdx.files.internal("graphics/jet/right_turn.png"));
     private Texture leftTurnTexture = new Texture(Gdx.files.internal("graphics/jet/left_turn.png"));
@@ -75,6 +77,7 @@ public class GameScreen implements Screen {
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
         resourceManager = maneuverGame.getResourceManager();
+        initResources();
         font.setColor(1,0,0,1);
         time = 0;
         planeSound.setVolume(0.3f);
@@ -95,9 +98,12 @@ public class GameScreen implements Screen {
                 ROCKET_DISTANCE,
                 ROCKET_FORCE,
                 rocketAnimation.getKeyFrame(1).getRegionWidth(),
-                rocketAnimation.getKeyFrame(1).getRegionHeight()
+                rocketAnimation.getKeyFrame(1).getRegionHeight(),
+                2
         );
         rocketSpawner.addSpawnListener(new RocketSpawner.SpawnListener() {
+            PhysicsActor rocketActor;
+
             @Override
             public void spawned(final GameWorld.GameBody rocket) {
                 rocketSound.play();
@@ -118,20 +124,22 @@ public class GameScreen implements Screen {
                     });
                 }
                 rockets.add(rocket);
-                final Actor rocketActor = new PhysicsActor(rocket, rocketAnimation);
+                rocketActor = new PhysicsActor(rocket, rocketAnimation);
+                rocketActor.addAnimation("depleted", rocketDepletedAnimation);
                 stage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
                     @Override
                     public void destroyed() {
                         rocketActor.remove();
                         rockets.remove(rocket);
+                        boomSound.play();
                     }
                 });
                 world.addContactHandler(plane, rocket, new GameWorld.ContactListener() {
                     @Override
                     public void beginContact() {
                         System.out.println("KABOOM!");
-                        boomSound.play();
+
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
                         new Thread(new Runnable() {
@@ -156,9 +164,13 @@ public class GameScreen implements Screen {
 
                     @Override
                     public void endContact() {
-
                     }
                 });
+            }
+
+            @Override
+            public void depleted(GameWorld.GameBody rocket) {
+                rocketActor.setCurrentAnimation("depleted");
             }
         });
         planeActor = new PhysicsActor(plane, planeTexture);
@@ -201,7 +213,25 @@ public class GameScreen implements Screen {
     }
 
     public void initResources() {
-
+        rocketDepletedAnimation = new Animation(
+                0.2f,
+                new Array<TextureRegion>(
+                        new TextureRegion[]{
+                                resourceManager.getRegion("graphics/depleted_missile/Missile00.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile01.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile02.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile03.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile04.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile05.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile06.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile07.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile08.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile09.png"),
+                                resourceManager.getRegion("graphics/depleted_missile/Missile010.png")
+                        }
+                ),
+                Animation.PlayMode.NORMAL
+        );
     }
 
     public void playSounds() {
