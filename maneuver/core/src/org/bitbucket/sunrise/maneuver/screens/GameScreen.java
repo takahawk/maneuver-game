@@ -74,11 +74,12 @@ public class GameScreen implements Screen {
     private static Thread timeThread = null;
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
+
         resourceManager = maneuverGame.getResourceManager();
         font.setColor(1,0,0,1);
         time = 0;
-        planeSound.setVolume(0.3f);
-        rotationSound.setVolume(0.5f);
+        planeSound.setVolume(0.05f);
+        rotationSound.setVolume(0.05f);
         this.batch = batch;
         world = new GameWorld(new Vector2(0, 0), 0.01f);
         debugRenderer = world.getDebugRenderer();
@@ -118,6 +119,7 @@ public class GameScreen implements Screen {
                     });
                 }
                 rockets.add(rocket);
+                rocketSound.play(0.05f);
                 final Actor rocketActor = new PhysicsActor(rocket, rocketAnimation);
                 stage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
@@ -131,7 +133,7 @@ public class GameScreen implements Screen {
                     @Override
                     public void beginContact() {
                         System.out.println("KABOOM!");
-                        boomSound.play();
+                        boomSound.play(0.05f);
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
                         new Thread(new Runnable() {
@@ -257,9 +259,9 @@ public class GameScreen implements Screen {
     }
 
     private void updateCam() {
-        cam.position.x = plane.getPosition().x;
-        cam.position.y = plane.getPosition().y;
-        cam.rotate(180f - plane.getVelocityAngle() - 90f - getCameraAngle(cam));
+        cam.position.x = plane.getPosition().x ;
+        cam.position.y = plane.getPosition().y ;
+        cam.rotate(90f - getCameraAngle(cam) - plane.getVelocityAngle());
         cam.update();
     }
 
@@ -288,8 +290,8 @@ public class GameScreen implements Screen {
         stage.draw();
         hud.act();
         hud.draw();
-        // Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
-        //debugRenderer.render(debugMatrix);
+        Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
+        debugRenderer.render(debugMatrix);
     }
 
     @Override
