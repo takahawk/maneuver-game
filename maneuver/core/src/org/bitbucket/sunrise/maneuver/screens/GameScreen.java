@@ -219,7 +219,7 @@ public class GameScreen implements Screen {
 
     public void initResources() {
         rocketDepletedAnimation = new Animation(
-                0.01f,
+                0.1f,
                 new Array<TextureRegion>(
                         new TextureRegion[] {
                                 resourceManager.getRegion("graphics/depleted_missile/Missile00.png"),
