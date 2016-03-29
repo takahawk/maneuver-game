@@ -1,6 +1,5 @@
 package org.bitbucket.sunrise.maneuver.screens;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -23,8 +22,8 @@ public class MenuScreen implements Screen {
     Skin skin;
     Stage stage;
 
-    final Game mGame;
-    public MenuScreen(Game g){
+    final ManeuverGame mGame;
+    public MenuScreen(ManeuverGame g){
         createBasicSkin();
         this.mGame=g;
 
@@ -41,7 +40,7 @@ public class MenuScreen implements Screen {
 
         newGameButton.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
-                mGame.setScreen( new GameScreen((ManeuverGame)mGame, new SpriteBatch()));
+                mGame.setScreen( new GameScreen(mGame, new SpriteBatch()));
             }
         });
 
@@ -59,7 +58,11 @@ public class MenuScreen implements Screen {
         skin.add("default", font);
 
         //Create a texture
-        Pixmap pixmap = new Pixmap((int)Gdx.graphics.getWidth()/4,(int)Gdx.graphics.getHeight()/10, Pixmap.Format.RGB888);
+        Pixmap pixmap = new Pixmap(
+                Gdx.graphics.getWidth() / 4,
+                Gdx.graphics.getHeight() / 10,
+                Pixmap.Format.RGB888
+        );
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
         skin.add("background",new Texture(pixmap));

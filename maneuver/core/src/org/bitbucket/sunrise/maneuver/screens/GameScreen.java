@@ -68,7 +68,8 @@ public class GameScreen implements Screen {
     private Music planeSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/uniform_noise.mp3"));
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
 
-    public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch, final ResourceManager resourceManager) {
+    public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
+        resourceManager = maneuverGame.getResourceManager();
         planeSound.setVolume(0.3f);
         rotationSound.setVolume(0.5f);
         this.batch = batch;
@@ -134,7 +135,7 @@ public class GameScreen implements Screen {
                                     Gdx.app.postRunnable(new Runnable() {
                                         @Override
                                         public void run() {
-                                            maneuverGame.setScreen(new GameScreen(maneuverGame, batch, resourceManager));
+                                            maneuverGame.setScreen(new GameScreen(maneuverGame, batch));
                                         }
                                     });
                                 } catch (InterruptedException e) {
