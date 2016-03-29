@@ -67,8 +67,8 @@ public class GameScreen implements Screen {
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
-        planeSound.setVolume(0.3f);
-        rotationSound.setVolume(0.5f);
+        planeSound.setVolume(0.05f);
+        rotationSound.setVolume(0.05f);
         this.batch = batch;
         world = new GameWorld(new Vector2(0, 0), 0.01f);
         debugRenderer = world.getDebugRenderer();
@@ -89,7 +89,7 @@ public class GameScreen implements Screen {
         rocketSpawner.addSpawnListener(new RocketSpawner.SpawnListener() {
             @Override
             public void spawned(final GameWorld.GameBody rocket) {
-                rocketSound.play();
+                rocketSound.play(0.05f);
                 final Actor rocketActor = new PhysicsActor(rocket, rocketAnimation);
                 stage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
@@ -102,7 +102,7 @@ public class GameScreen implements Screen {
                     @Override
                     public void beginContact() {
                         System.out.println("KABOOM!");
-                        boomSound.play();
+                        boomSound.play(0.05f);
                         bodiesToBeRemoved.offer(plane);
                         bodiesToBeRemoved.offer(rocket);
                         new Thread(new Runnable() {
@@ -213,9 +213,9 @@ public class GameScreen implements Screen {
     }
 
     private void updateCam() {
-        cam.position.x = plane.getPosition().x;
-        cam.position.y = plane.getPosition().y;
-        cam.rotate(180f - plane.getVelocityAngle() - 90f - getCameraAngle(cam));
+        cam.position.x = plane.getPosition().x ;
+        cam.position.y = plane.getPosition().y ;
+        cam.rotate(90f - getCameraAngle(cam) - plane.getVelocityAngle());
         cam.update();
     }
 
@@ -240,8 +240,8 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.draw();
-        // Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
-        //debugRenderer.render(debugMatrix);
+        Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
+        debugRenderer.render(debugMatrix);
     }
 
     @Override

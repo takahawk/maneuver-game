@@ -53,7 +53,7 @@ public class RocketSpawner {
     }
     public void spawn() {
         Vector2 distVector = new Vector2(distance, 0);
-        distVector.rotate(MathUtils.random(360));
+        distVector.rotate(MathUtils.random(240, 330));
         final GameWorld.GameBody rocket = plane.getWorld().addRectangularBody(
                 new Vector2(plane.getPosition()).add(distVector),
                 width,
