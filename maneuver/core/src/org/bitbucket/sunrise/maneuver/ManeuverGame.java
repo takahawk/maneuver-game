@@ -21,8 +21,6 @@ public class ManeuverGame extends Game {
 	ResourceManager resourceManager = new ResourceManager();
 	ScoreManager scoreManager;
 	SpriteBatch batch;
-	Texture img;
-
 	public ResourceManager getResourceManager() {
 		return resourceManager;
 	}
