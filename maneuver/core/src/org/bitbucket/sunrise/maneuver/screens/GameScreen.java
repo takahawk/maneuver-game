@@ -11,10 +11,13 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -27,6 +30,7 @@ import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
 import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
 
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,6 +54,7 @@ public class GameScreen implements Screen {
             (int) (ManeuverGame.WIDTH / ManeuverGame.RATIO)
         );
     private Stage gameStage = new Stage(stageViewport);
+    private Stage pauseStage = new Stage();
     private Stage hud = new Stage();
     private OrthographicCamera cam;
     private Queue<GameWorld.GameBody> bodiesToBeRemoved = new ArrayDeque<GameWorld.GameBody>();
@@ -76,6 +81,7 @@ public class GameScreen implements Screen {
     private final BitmapFont font = new BitmapFont();
     private static volatile float time = 0;
     private boolean isGameOver = false;
+    private boolean paused = false;
 
     public GameScreen(final ManeuverGame maneuverGame, final SpriteBatch batch) {
         this.maneuverGame = maneuverGame;
@@ -208,13 +214,37 @@ public class GameScreen implements Screen {
         initHud();
         setInputProcessor();
 //        Gdx.input.setInputProcessor(hud);
+
+        initHud();
+        initPauseStage();
     }
 
     private void setInputProcessor() {
-       Gdx.input.setInputProcessor(new InputMultiplexer(
-               hud,
-               gameStage
-       ));
+        Gdx.input.setInputProcessor(new InputMultiplexer(
+                hud,
+                gameStage
+        ));
+    }
+    private void initPauseStage() {
+        Table table = new Table();
+        table.setFillParent(true);
+        Texture texture = new Texture(Gdx.files.internal("play.png"));
+        TextureRegionDrawable pauseImage = new TextureRegionDrawable(new TextureRegion(texture));
+        ImageButton playButton = new ImageButton(pauseImage);
+        table.add(playButton).center();
+        playButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                paused = false;
+                Gdx.input.setInputProcessor(hud);
+            }
+        });
+
+        Skin skin = new Skin();
+        skin.add("white", new Texture("white4px.png"));
+        Drawable backgroubd = skin.newDrawable("white", new Color(0, 0, 0, 0.8f));
+        table.setBackground(backgroubd);
+        pauseStage.addActor(table);
     }
 
     private void initHud() {
@@ -239,6 +269,21 @@ public class GameScreen implements Screen {
         table.row();
         table.add().expandY();
         table.row();
+        Texture texture = new Texture(Gdx.files.internal("pause.png"));
+        TextureRegionDrawable pauseImage = new TextureRegionDrawable(new TextureRegion(texture));
+        ImageButton pauseButton = new ImageButton(pauseImage);
+        table.add().expandX();
+        table.add(pauseButton).expandX().right();
+
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                paused = true;
+                Gdx.input.setInputProcessor(pauseStage);
+            }
+        });
+
+
         hud.addActor(table);
     }
 
@@ -266,13 +311,13 @@ public class GameScreen implements Screen {
     }
 
     public void playSounds() {
-        if (plane.isActive()) {
+        if (plane.isActive() && !paused) {
             if (!planeSound.isPlaying())
                 planeSound.play();
         } else if (planeSound.isPlaying()) {
             planeSound.stop();
         }
-        if (isRotateControlPressed()) {
+        if (isRotateControlPressed() && !paused) {
             if (!rotationSound.isPlaying())
                 rotationSound.play();
         } else if (rotationSound.isPlaying()) {
@@ -325,12 +370,14 @@ public class GameScreen implements Screen {
     }
 
     public void update(float delta) {
-        rocketSpawner.update(delta);
-        world.update(delta);
-        while (!bodiesToBeRemoved.isEmpty()) {
-            world.destroyBody(bodiesToBeRemoved.poll());
+        if(!paused) {
+            rocketSpawner.update(delta);
+            world.update(delta);
+            while (!bodiesToBeRemoved.isEmpty()) {
+                world.destroyBody(bodiesToBeRemoved.poll());
+            }
+            updateCam();
         }
-        updateCam();
         playSounds();
     }
 
@@ -341,18 +388,23 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         time += delta;
-        handleInput();
+        if(!paused) {
+            handleInput();
+        }
         update(delta);
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (!isGameOver) {
+        if (!isGameOver && !paused) {
             hud.act();
         }
 
-        gameStage.act();
         gameStage.draw();
         hud.draw();
+        if(paused) {
+            pauseStage.act();
+            pauseStage.draw();
+        }
         if (isGameOver) {
             Gdx.app.postRunnable(new Runnable() {
                 @Override
