@@ -9,10 +9,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -54,8 +51,28 @@ public class GameScreen implements Screen {
             (int) (ManeuverGame.WIDTH / ManeuverGame.RATIO)
         );
     private Stage gameStage = new Stage(stageViewport);
-    private Stage pauseStage = new Stage();
-    private Stage hud = new Stage();
+    private Stage pauseStage = new Stage() {
+
+        @Override
+        public boolean keyDown(int keyCode) {
+            if (keyCode == Input.Keys.BACK)
+                GameScreen.this.maneuverGame.setScreen(
+                        new MenuScreen(GameScreen.this.maneuverGame)
+                );
+            return false;
+        }
+    };
+    private Stage hud = new Stage() {
+
+        @Override
+        public boolean keyDown(int keyCode) {
+            if (keyCode == Input.Keys.BACK) {
+                paused = true;
+                Gdx.input.setInputProcessor(pauseStage);
+            }
+            return false;
+        }
+    };
     private OrthographicCamera cam;
     private Queue<GameWorld.GameBody> bodiesToBeRemoved = new ArrayDeque<GameWorld.GameBody>();
 
@@ -275,14 +292,15 @@ public class GameScreen implements Screen {
         table.add().expandX();
         table.add(pauseButton).expandX().right();
 
-        pauseButton.addListener(new ClickListener() {
+        pauseButton.addListener(new InputListener() {
+
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 paused = true;
                 Gdx.input.setInputProcessor(pauseStage);
+                return true;
             }
         });
-
 
         hud.addActor(table);
     }

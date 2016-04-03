@@ -1,6 +1,7 @@
 package org.bitbucket.sunrise.maneuver.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -27,7 +28,16 @@ public class MenuScreen implements Screen {
         createBasicSkin();
         this.mGame=g;
 
-        stage = new Stage();
+        stage = new Stage() {
+
+            @Override
+            public boolean keyDown(int keyCode) {
+                if (keyCode == Input.Keys.BACK) {
+                    Gdx.app.exit();
+                }
+                return false;
+            }
+        };
         Gdx.input.setInputProcessor(stage);// Make the stage consume events
 
         createBasicSkin();

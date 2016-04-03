@@ -1,6 +1,7 @@
 package org.bitbucket.sunrise.maneuver.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -28,7 +29,16 @@ public class ScoreScreen implements Screen {
     public Stage stage = new Stage(new FitViewport(
             WIDTH,
             (int) (WIDTH / RATIO)
-    ));
+    )) {
+
+        @Override
+        public boolean keyDown(int keyCode) {
+            if (keyCode == Input.Keys.BACK) {
+                ScoreScreen.this.game.setScreen(new MenuScreen(ScoreScreen.this.game));
+            }
+            return false;
+        }
+    };
 
     public ScoreScreen(ManeuverGame game) {
         this.game = game;
