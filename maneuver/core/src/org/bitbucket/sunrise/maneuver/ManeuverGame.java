@@ -5,14 +5,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
+import com.kotcrab.vis.ui.VisUI;
 import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.ScoreManager;
 import org.bitbucket.sunrise.maneuver.screens.MenuScreen;
+import static org.bitbucket.sunrise.maneuver.Constants.*;
 
 public class ManeuverGame extends Game {
-	private static final float DEFAULT_ROCKET_FORCE = 300f;
-	private static final float DEFAULT_ROCKET_RESOURCE = 5f;
-	private static final float DEFAULT_PLANE_SPEED = 200f;
 
 	public static final int WIDTH = 1184 * 2;
 	public static final int HEIGHT = 720 * 2;
@@ -40,17 +40,24 @@ public class ManeuverGame extends Game {
 			preferences.putFloat("rocketResource", DEFAULT_ROCKET_RESOURCE);
 		if (!preferences.contains("planeSpeed"))
 			preferences.putFloat("planeSpeed", DEFAULT_PLANE_SPEED);
+		preferences.flush();
 	}
 
 	@Override
 	public void create () {
+		Gdx.input.setCatchBackKey(true);
+		if (VisUI.isLoaded())
+			VisUI.dispose();
+		VisUI.load();
 		batch = new SpriteBatch();
 		//setScreen(new GameScreen(this, batch));
-		setScreen(new MenuScreen(this));
 		preferences = Gdx.app.getPreferences("ManeuverGame");
-		scoreManager = new ScoreManager(preferences);
 		initPreferences();
+		scoreManager = new ScoreManager(preferences);
+		setScreen(new MenuScreen(this));
 	}
+
+
 
 	@Override
 	public void render () {

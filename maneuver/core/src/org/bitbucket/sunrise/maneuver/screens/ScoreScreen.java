@@ -29,10 +29,6 @@ public class ScoreScreen implements Screen {
             WIDTH,
             (int) (WIDTH / RATIO)
     ));
-    static {
-        if (!VisUI.isLoaded())
-            VisUI.load();
-    }
 
     public ScoreScreen(ManeuverGame game) {
         this.game = game;
@@ -106,6 +102,6 @@ public class ScoreScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        stage.dispose();
     }
 }

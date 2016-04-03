@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  * Created by sp213-08 on 21.03.2016.
  */
 public final class ResourceManager {
-    public final AssetManager assetManager = new AssetManager();
+    public AssetManager assetManager = new AssetManager();
 
 
     public Texture getTexture(String name) {
@@ -31,4 +31,8 @@ public final class ResourceManager {
         assetManager.dispose();
     }
 
+    public void reset() {
+        assetManager.dispose();
+        assetManager = new AssetManager();
+    }
 }

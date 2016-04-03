@@ -1,14 +1,15 @@
 package org.bitbucket.sunrise.maneuver.screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.kotcrab.vis.ui.VisUI;
@@ -18,6 +19,7 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.game.ScoreManager;
+import static org.bitbucket.sunrise.maneuver.Constants.*;
 
 /**
  * Created by takahawk on 29.03.16.
@@ -31,11 +33,16 @@ public class OptionsScreen implements Screen {
     public Stage stage = new Stage(new FitViewport(
             WIDTH,
             (int) (WIDTH / RATIO)
-    ));
-    static {
-        if (!VisUI.isLoaded())
-            VisUI.load();
-    }
+    )) {
+
+        @Override
+        public boolean keyDown(int keyCode) {
+            if (keyCode == Input.Keys.BACK) {
+                OptionsScreen.this.game.setScreen(new MenuScreen(OptionsScreen.this.game));
+            }
+            return false;
+        }
+    };
 
     public OptionsScreen(ManeuverGame game) {
         this.game = game;
@@ -48,16 +55,37 @@ public class OptionsScreen implements Screen {
         table.setFillParent(true);
         table.setMovable(false);
         table.add(new VisLabel("Rocket speed: ")).align(Align.left);
-        table.add(getFloatPreferenceSlider("rocketSpeed", 100, 1000, 25)).pad(15);
-        table.add(getFloatPreferenceLabel("rocketSpeed"));
+        VisLabel visLabel = getFloatPreferenceLabel("rocketSpeed");
+        table.add(getFloatPreferenceSlider(
+                "rocketSpeed",
+                visLabel,
+                MIN_ROCKET_FORCE,
+                MAX_ROCKET_FORCE,
+                25
+        )).pad(15);
+        table.add(visLabel);
         table.row();
+        visLabel = getFloatPreferenceLabel("rocketResource");
         table.add(new VisLabel("Rocket resource: ")).align(Align.left);
-        table.add(getFloatPreferenceSlider("rocketResource", 2, 10, 0.25f)).pad(15);
-        table.add(getFloatPreferenceLabel("rocketResource"));
+        table.add(getFloatPreferenceSlider(
+                "rocketResource",
+                visLabel,
+                MIN_ROCKET_RESOURCE,
+                MAX_ROCKET_RESOURCE,
+                0.25f
+        )).pad(15);
+        table.add(visLabel);
         table.row();
+        visLabel = getFloatPreferenceLabel("planeSpeed");
         table.add(new VisLabel("Plane speed: ")).align(Align.left);
-        table.add(getFloatPreferenceSlider("planeSpeed", 100, 1000, 25f)).pad(15);
-        table.add(getFloatPreferenceLabel("planeSpeed"));
+        table.add(getFloatPreferenceSlider(
+                "planeSpeed",
+                visLabel,
+                100,
+                1000,
+                25f
+        )).pad(15);
+        table.add(visLabel);
         table.row();
 
 
@@ -77,26 +105,21 @@ public class OptionsScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
     }
 
-    private VisSlider getFloatPreferenceSlider(final String preference, float min, float max, float step) {
-        final VisSlider rocketSpeedSlider = new VisSlider(min, max, step, false);
-        rocketSpeedSlider.setValue(game.getPreferences().getFloat(preference));
-        rocketSpeedSlider.addListener(new ChangeListener() {
+    private VisSlider getFloatPreferenceSlider(final String preference, final VisLabel label, float min, float max, float step) {
+        final VisSlider preferenceSlider = new VisSlider(min, max, step, false);
+        preferenceSlider.setValue(game.getPreferences().getFloat(preference));
+        preferenceSlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.getPreferences().putFloat(preference, rocketSpeedSlider.getValue());
+                game.getPreferences().putFloat(preference, preferenceSlider.getValue());
+                label.setText(Float.toString(preferenceSlider.getValue()));
             }
         });
-        return rocketSpeedSlider;
+        return preferenceSlider;
     }
 
     private VisLabel getFloatPreferenceLabel(final String preference) {
-        return new VisLabel() {
-
-            @Override
-            public void act(float delta) {
-                setText(Float.toString(game.getPreferences().getFloat(preference)));
-            }
-        };
+        return new VisLabel(Float.toString(game.getPreferences().getFloat(preference)));
     }
 
     @Override
@@ -134,6 +157,6 @@ public class OptionsScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        stage.dispose();
     }
 }
