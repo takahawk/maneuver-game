@@ -25,6 +25,7 @@ import org.bitbucket.sunrise.maneuver.game.GameWorld;
 import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
 import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
 import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
+import static org.bitbucket.sunrise.maneuver.Constants.*;
 
 import java.util.*;
 import java.util.List;
@@ -118,12 +119,13 @@ public class GameScreen implements Screen {
                 planeTexture.getRegionWidth(),
                 planeTexture.getRegionHeight()
         );
-        plane.setLinearVelocity(0, preferences.getFloat("planeSpeed"));
+        float rocketSpeed = preferences.getFloat("rocketSpeed");
+        plane.setLinearVelocity(0, rocketSpeed * PLANE_SPEED_TO_ROOKET_SPEED_RATIO);
         rocketSpawner = new RocketSpawner(
                 plane,
                 ROCKET_SPAWN_FREQ,
                 ROCKET_DISTANCE,
-                preferences.getFloat("rocketSpeed"),
+                rocketSpeed,
                 rocketAnimation.getKeyFrame(1).getRegionWidth(),
                 rocketAnimation.getKeyFrame(1).getRegionHeight(),
                 preferences.getFloat("rocketResource")
@@ -364,11 +366,11 @@ public class GameScreen implements Screen {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             // sound.play();
-            plane.rotateVelocity(1f);
+            plane.rotateVelocity(1.5f);
             System.out.println(getCameraAngle(cam));
             planeActor.setCurrentAnimation("left");
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            plane.rotateVelocity(-1f);
+            plane.rotateVelocity(-1.5f);
             System.out.println(getCameraAngle(cam));
             planeActor.setCurrentAnimation("right");
         } else {

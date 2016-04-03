@@ -76,17 +76,17 @@ public class OptionsScreen implements Screen {
         )).pad(15);
         table.add(visLabel);
         table.row();
-        visLabel = getFloatPreferenceLabel("planeSpeed");
-        table.add(new VisLabel("Plane speed: ")).align(Align.left);
-        table.add(getFloatPreferenceSlider(
-                "planeSpeed",
-                visLabel,
-                100,
-                1000,
-                25f
-        )).pad(15);
-        table.add(visLabel);
-        table.row();
+//        visLabel = getFloatPreferenceLabel("planeSpeed");
+//        table.add(new VisLabel("Plane speed: ")).align(Align.left);
+//        table.add(getFloatPreferenceSlider(
+//                "planeSpeed",
+//                visLabel,
+//                100,
+//                1000,
+//                25f
+//        )).pad(15);
+//        table.add(visLabel);
+//        table.row();
 
 
         table.add().expand();

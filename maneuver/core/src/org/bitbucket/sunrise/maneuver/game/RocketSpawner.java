@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
+import static org.bitbucket.sunrise.maneuver.Constants.*;
 
 /**
  * Created by takahawk on 15.03.16.
@@ -75,9 +76,17 @@ public class RocketSpawner {
                     return;
                 resource -= delta;
                 if (resource > 0) {
+                    Vector2 velocity = rocket.getLinearVelocity();
                     rocket.applyForce(
-                            plane.getPosition().sub(rocket.getPosition()).setLength(rocketForce),
+                            new Vector2(rocketForce * AIR_RESISTANCE_MODIFIER, 0).setAngle(velocity.angle() - 180),
                             true
+                    );
+                    rocket.applyForce(
+                            plane.getPosition().sub(rocket.getPosition()).setLength(rocketForce / AIR_RESISTANCE_MODIFIER),
+                            true
+                    );
+                    rocket.setVelocityAngle(
+                            rocket.getVelocityAngle()
                     );
                 } else if (resource < -DEPLETED_MISSILE_LIFETIME) {
                     GameWorld world = rocket.getWorld();

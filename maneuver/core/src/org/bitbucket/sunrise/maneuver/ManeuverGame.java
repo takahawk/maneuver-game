@@ -38,8 +38,8 @@ public class ManeuverGame extends Game {
 			preferences.putFloat("rocketSpeed", DEFAULT_ROCKET_FORCE);
 		if (!preferences.contains("rocketResource"))
 			preferences.putFloat("rocketResource", DEFAULT_ROCKET_RESOURCE);
-		if (!preferences.contains("planeSpeed"))
-			preferences.putFloat("planeSpeed", DEFAULT_PLANE_SPEED);
+//		if (!preferences.contains("planeSpeed"))
+//			preferences.putFloat("planeSpeed", DEFAULT_PLANE_SPEED);
 		preferences.flush();
 	}
 

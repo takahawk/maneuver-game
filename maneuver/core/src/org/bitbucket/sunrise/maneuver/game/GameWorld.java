@@ -84,7 +84,7 @@ public class GameWorld {
         }
 
         public Vector2 getLinearVelocity() {
-            return body.getLinearVelocity().scl(1 / scale, 1 / scale);
+            return body.getLinearVelocity().cpy().scl(1 / scale, 1 / scale);
         }
 
         public void setLinearVelocity(float x, float y) {
