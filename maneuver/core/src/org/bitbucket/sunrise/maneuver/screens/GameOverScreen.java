@@ -25,7 +25,7 @@ public class GameOverScreen implements Screen {
     Skin skin;
     ManeuverGame mGame;
 
-    public GameOverScreen (ManeuverGame game){
+    public GameOverScreen (final ManeuverGame game){
         createBasicSkin();
         this.mGame = game;
 
@@ -54,7 +54,7 @@ public class GameOverScreen implements Screen {
 
         newGameButton.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
-                mGame.setScreen(new GameScreen(new ManeuverGame(), new SpriteBatch()));
+                mGame.setScreen(new GameScreen(game, new SpriteBatch()));
             }
         });
 

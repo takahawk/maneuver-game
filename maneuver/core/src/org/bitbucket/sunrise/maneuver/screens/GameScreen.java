@@ -12,9 +12,9 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -26,7 +26,6 @@ import org.bitbucket.sunrise.maneuver.ManeuverGame;
 import org.bitbucket.sunrise.maneuver.asset.ResourceManager;
 import org.bitbucket.sunrise.maneuver.game.GameWorld;
 import org.bitbucket.sunrise.maneuver.game.RocketSpawner;
-import org.bitbucket.sunrise.maneuver.game.ScoreManager;
 import org.bitbucket.sunrise.maneuver.render.InfiniteBackground;
 import org.bitbucket.sunrise.maneuver.render.PhysicsActor;
 
@@ -37,7 +36,8 @@ import java.util.concurrent.TimeUnit;
  * Created by takahawk on 07.03.16.
  */
 public class GameScreen implements Screen {
-    private ManeuverGame maneuverGame;
+    private static final int BOOM_TIME = 3;
+    private static final int SWITCH_TO_GAME_OVER_TIME = 3;
     private static final float ROCKET_SPAWN_FREQ = 5f;
     private static final float ROCKET_DISTANCE = 500f;
     private GameWorld world;
@@ -52,12 +52,8 @@ public class GameScreen implements Screen {
             ManeuverGame.WIDTH,
             (int) (ManeuverGame.WIDTH / ManeuverGame.RATIO)
         );
-    private Viewport hudViewport = new FitViewport(
-            ManeuverGame.WIDTH,
-            (int) (ManeuverGame.WIDTH / ManeuverGame.RATIO)
-    );
-    private Stage stage = new Stage(stageViewport);
-    private Stage hud = new Stage(hudViewport);
+    private Stage gameStage = new Stage(stageViewport);
+    private Stage hud = new Stage();
     private OrthographicCamera cam;
     private Queue<GameWorld.GameBody> bodiesToBeRemoved = new ArrayDeque<GameWorld.GameBody>();
 
@@ -139,11 +135,23 @@ public class GameScreen implements Screen {
                 rocketActors.put(rocket, rocketActor);
                 rocketActor.addAnimation("depleted", rocketDepletedAnimation);
                 rocketSound.play(0.05f);
-                stage.addActor(rocketActor);
+                gameStage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
                     @Override
                     public void destroyed() {
-                        rocketActor.remove();
+                        // TODO: set animation
+                        rocketActor.addAction(new Action() {
+                            float ttl = BOOM_TIME;
+                            @Override
+                            public boolean act(float delta) {
+                                ttl -= delta;
+                                if (ttl < 0) {
+                                    rocketActor.remove();
+                                    return true;
+                                }
+                                return false;
+                            }
+                        });
                         rockets.remove(rocket);
                         rocketActors.remove(rocket);
                         boomSound.play();
@@ -173,22 +181,35 @@ public class GameScreen implements Screen {
         planeActor = new PhysicsActor(plane, planeTexture);
         planeActor.addTexture("right", resourceManager.getTexture("graphics/jet/right_turn.png"));
         planeActor.addTexture("left", resourceManager.getTexture("graphics/jet/left_turn.png"));
-        stage.addActor(planeActor);
+        gameStage.addActor(planeActor);
         plane.setDestroyListener(new GameWorld.DestroyListener() {
             @Override
             public void destroyed() {
-                planeActor.remove();
+                // TODO: set animation
+                planeActor.addAction(new Action() {
+                    float ttl = BOOM_TIME;
+                    @Override
+                    public boolean act(float delta) {
+                        ttl -= delta;
+                        if (ttl < 0) {
+                            planeActor.remove();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
             }
         });
-        cam = (OrthographicCamera) stage.getViewport().getCamera();
+        cam = (OrthographicCamera) gameStage.getViewport().getCamera();
         Actor backgroundActor = new InfiniteBackground(
                     cam,
                     new TextureRegion(background),
                     new Vector2(0, 0)
         );
-        stage.addActor(backgroundActor);
+        gameStage.addActor(backgroundActor);
         backgroundActor.toBack();
         initHud();
+        Gdx.input.setInputProcessor(hud);
     }
 
     private void initHud() {
@@ -320,12 +341,25 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        stage.act();
-        stage.draw();
-        hud.act();
+        if (!isGameOver) {
+            hud.act();
+        }
+
+        gameStage.act();
+        gameStage.draw();
         hud.draw();
-        if(isGameOver) {
-            maneuverGame.setScreen(new GameOverScreen(maneuverGame));
+        if (isGameOver) {
+            Gdx.app.postRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        TimeUnit.SECONDS.sleep(SWITCH_TO_GAME_OVER_TIME);
+                    } catch(InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    maneuverGame.setScreen(new GameOverScreen(maneuverGame));
+                }
+            });
         }
         Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
         debugRenderer.render(debugMatrix);
@@ -334,7 +368,6 @@ public class GameScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stageViewport.update(width, height);
-        hudViewport.update(width, height);
     }
 
     @Override
