@@ -2,6 +2,7 @@ package org.bitbucket.sunrise.maneuver.screens;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -25,9 +26,11 @@ import static org.bitbucket.sunrise.maneuver.Constants.*;
  * Created by takahawk on 29.03.16.
  */
 public class OptionsScreen implements Screen {
-    private static final int WIDTH = 1184 / 3;
-    private static final int HEIGHT = 720 / 3;
+    private static final int WIDTH = (int) (1184 / 1.3);
+    private static final int HEIGHT = (int) (720 / 1.3);
     private static final float RATIO = (float) WIDTH / HEIGHT;
+
+    private BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/white.fnt"));
 
     public ManeuverGame game;
     public Stage stage = new Stage(new FitViewport(
@@ -51,9 +54,14 @@ public class OptionsScreen implements Screen {
 
     public void initUI() {
         final Preferences preferences = game.getPreferences();
+        new VisLabel().getStyle().font = font;
+        new VisWindow("").getStyle().titleFont = font;
+        new VisTextButton("").getStyle().font = font;
         VisWindow table = new VisWindow("OPTIONS");
         table.setFillParent(true);
         table.setMovable(false);
+        table.add().colspan(3).expand();
+        table.row();
         table.add(new VisLabel("Rocket speed: ")).align(Align.left);
         VisLabel visLabel = getFloatPreferenceLabel("rocketSpeed");
         table.add(getFloatPreferenceSlider(
@@ -62,8 +70,10 @@ public class OptionsScreen implements Screen {
                 MIN_ROCKET_FORCE,
                 MAX_ROCKET_FORCE,
                 25
-        )).pad(15);
-        table.add(visLabel);
+        )).pad(15).fill().expandX();
+        table.add(visLabel).fill().expandX();
+        table.row();
+        table.add().colspan(3).expand();
         table.row();
         visLabel = getFloatPreferenceLabel("rocketResource");
         table.add(new VisLabel("Rocket resource: ")).align(Align.left);
@@ -73,8 +83,8 @@ public class OptionsScreen implements Screen {
                 MIN_ROCKET_RESOURCE,
                 MAX_ROCKET_RESOURCE,
                 0.25f
-        )).pad(15);
-        table.add(visLabel);
+        )).pad(15).fill().expandX();
+        table.add(visLabel).fill().expandX();
         table.row();
 //        visLabel = getFloatPreferenceLabel("planeSpeed");
 //        table.add(new VisLabel("Plane speed: ")).align(Align.left);
@@ -158,5 +168,6 @@ public class OptionsScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        font.dispose();
     }
 }

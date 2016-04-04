@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import org.bitbucket.sunrise.maneuver.ManeuverGame;
@@ -25,6 +26,7 @@ public class GameOverScreen implements Screen {
     Stage stage;
     Skin skin;
     ManeuverGame mGame;
+    private BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/white.fnt"));
 
     public GameOverScreen (final ManeuverGame game){
         createBasicSkin();
@@ -45,6 +47,8 @@ public class GameOverScreen implements Screen {
         Gdx.input.setInputProcessor(stage);// Make the stage consume events
 
         createBasicSkin();
+        Table table = new Table();
+        table.setFillParent(true);
         TextButton newGameButton = new TextButton("Play again", skin);
         TextButton mainMenuButton = new TextButton("Main menu", skin);
 
@@ -60,10 +64,16 @@ public class GameOverScreen implements Screen {
         region.setRegionWidth(Gdx.graphics.getWidth());
         Image gameOverImage = new Image(region);
 
-        stage.addActor(gameOverImage);
-        stage.addActor(newGameButton);
-        stage.addActor(mainMenuButton);
+//        stage.addActor(gameOverImage);
+//        stage.addActor(newGameButton);
+//        stage.addActor(mainMenuButton);
 
+        table.add(gameOverImage).pad(20).colspan(3).fill(); table.row();
+        table.add().expandX(); table.add(newGameButton).pad(20).fill(); table.add().expandX();  table.row();
+        table.add().expandX(); table.add(mainMenuButton).pad(20).fill(); table.add().expandX();  table.row();
+        table.add().colspan(3).expand();
+        table.row();
+        stage.addActor(table);
         newGameButton.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
                 mGame.setScreen(new GameScreen(game, new SpriteBatch()));
@@ -79,7 +89,6 @@ public class GameOverScreen implements Screen {
 
     private void createBasicSkin(){
         //Create a font
-        BitmapFont font = new BitmapFont();
         skin = new Skin();
         skin.add("default", font);
 

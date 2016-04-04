@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -21,9 +22,10 @@ import org.bitbucket.sunrise.maneuver.game.ScoreManager;
  * Created by takahawk on 29.03.16.
  */
 public class ScoreScreen implements Screen {
-    private static final int WIDTH = 1184 / 3;
-    private static final int HEIGHT = 720 / 3;
+    private static final int WIDTH = 1184;
+    private static final int HEIGHT = 720;
     private static final float RATIO = (float) WIDTH / HEIGHT;
+    public BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/white.fnt"));
 
     public ManeuverGame game;
     public Stage stage = new Stage(new FitViewport(
@@ -46,6 +48,9 @@ public class ScoreScreen implements Screen {
     }
 
     public void initUI() {
+        new VisLabel().getStyle().font = font;
+        new VisWindow("").getStyle().titleFont = font;
+        new VisTextButton("").getStyle().font = font;
         ScoreManager scoreManager = game.getScoreManager();
         VisWindow table = new VisWindow("HIGH SCORES");
         table.setFillParent(true);
@@ -55,9 +60,11 @@ public class ScoreScreen implements Screen {
         for (ScoreManager.ScoreResult sr : scoreManager.getScores()) {
             if (sr == null)
                 break;
+            table.add().colspan(3).expand();
+            table.row();
             table.add(new VisLabel(Integer.toString(number)));
-            table.add(new VisLabel(sr.name));
-            table.add(new VisLabel(Integer.toString(sr.score))).padLeft(100);
+            table.add(new VisLabel(sr.name)).expandX().align(Align.left);
+            table.add(new VisLabel(Integer.toString(sr.score))).padLeft(100).padRight(100);
             table.row();
             number++;
         }
@@ -69,10 +76,10 @@ public class ScoreScreen implements Screen {
                 game.setScreen(new MenuScreen(game));
             }
         });
-        table.add().expand();
+        table.add().colspan(3).expand();
         table.row();
         table.left();
-        table.add(toMenu);
+        table.add(toMenu).pad(50);
         stage.addActor(table);
         Gdx.input.setInputProcessor(stage);
     }

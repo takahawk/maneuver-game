@@ -99,7 +99,7 @@ public class GameScreen implements Screen {
     private Sound boomSound = Gdx.audio.newSound(Gdx.files.internal("sounds/boom/short explosion.mp3"));
     private Music planeSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/uniform_noise.mp3"));
     private Music rotationSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/airplane/rotation noise.mp3"));
-    private final BitmapFont font = new BitmapFont();
+    private final BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/white.fnt"));
     private static volatile float time = 0;
     private boolean isGameOver = false;
     private boolean paused = false;
@@ -123,7 +123,7 @@ public class GameScreen implements Screen {
                 planeTexture.getRegionHeight()
         );
         float rocketSpeed = preferences.getFloat("rocketSpeed");
-        plane.setLinearVelocity(0, rocketSpeed * PLANE_SPEED_TO_ROOKET_SPEED_RATIO);
+        plane.setLinearVelocity(0, rocketSpeed * PLANE_SPEED_TO_ROCKET_SPEED_RATIO);
         rocketSpawner = new RocketSpawner(
                 plane,
                 ROCKET_SPAWN_FREQ,
@@ -273,6 +273,7 @@ public class GameScreen implements Screen {
 
     private void initHud() {
         Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+        new Label("", skin).getStyle().font = font;
         Table table = new Table();
         table.setFillParent(true);
         table.add(new Label("", skin) {
@@ -293,11 +294,11 @@ public class GameScreen implements Screen {
         table.row();
         table.add().expandY();
         table.row();
-        Texture texture = new Texture(Gdx.files.internal("pause.png"));
+        Texture texture = new Texture(Gdx.files.internal("pause-button.png"));
         TextureRegionDrawable pauseImage = new TextureRegionDrawable(new TextureRegion(texture));
         ImageButton pauseButton = new ImageButton(pauseImage);
         table.add().expandX();
-        table.add(pauseButton).expandX().right();
+        table.add(pauseButton).expandX().right().pad(20);
 
         pauseButton.addListener(new InputListener() {
 
@@ -367,7 +368,7 @@ public class GameScreen implements Screen {
                         }
                 )
         );
-        background = new Texture(Gdx.files.internal("background.png"));
+        background = new Texture(Gdx.files.internal("graphics/background.jpg"));
     }
 
     public void playSounds() {
@@ -471,8 +472,8 @@ public class GameScreen implements Screen {
                 maneuverGame.setScreen(new GameOverScreen(maneuverGame));
             }
         }
-        Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
-        debugRenderer.render(debugMatrix);
+//        Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
+//        debugRenderer.render(debugMatrix);
     }
 
     @Override
