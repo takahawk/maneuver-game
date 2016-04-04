@@ -39,6 +39,7 @@ public class GameScreen implements Screen {
     private static final int SWITCH_TO_GAME_OVER_TIME = 3;
     private static final float ROCKET_SPAWN_FREQ = 5f;
     private static final float ROCKET_DISTANCE = 500f;
+    private float gameOverTimer = SWITCH_TO_GAME_OVER_TIME;
     private GameWorld world;
     private GameWorld.DebugRenderer debugRenderer;
     private GameWorld.GameBody plane;
@@ -86,6 +87,8 @@ public class GameScreen implements Screen {
             new TextureRegion(new Texture(Gdx.files.internal("graphics/missile/3.png")))
     );
     private Animation rocketDepletedAnimation;
+    private Animation rocketExplosionAnimation;
+    private Animation planeExplosionAnimation;
 
     private Texture rightTurnTexture = new Texture(Gdx.files.internal("graphics/jet/right_turn.png"));
     private Texture leftTurnTexture = new Texture(Gdx.files.internal("graphics/jet/left_turn.png"));
@@ -156,12 +159,13 @@ public class GameScreen implements Screen {
                 final PhysicsActor rocketActor = new PhysicsActor(rocket, rocketAnimation);
                 rocketActors.put(rocket, rocketActor);
                 rocketActor.addAnimation("depleted", rocketDepletedAnimation);
+                rocketActor.addAnimation("explosion", rocketExplosionAnimation);
                 rocketSound.play(0.05f);
                 gameStage.addActor(rocketActor);
                 rocket.setDestroyListener(new GameWorld.DestroyListener() {
                     @Override
                     public void destroyed() {
-                        // TODO: set animation
+                        rocketActor.setCurrentAnimation("explosion", true);
                         rocketActor.addAction(new Action() {
                             float ttl = BOOM_TIME;
                             @Override
@@ -197,17 +201,18 @@ public class GameScreen implements Screen {
 
             @Override
             public void depleted(GameWorld.GameBody rocket) {
-                rocketActors.get(rocket).setCurrentAnimation("depleted");
+                rocketActors.get(rocket).setCurrentAnimation("depleted", true);
             }
         });
         planeActor = new PhysicsActor(plane, planeTexture);
         planeActor.addTexture("right", resourceManager.getTexture("graphics/jet/right_turn.png"));
         planeActor.addTexture("left", resourceManager.getTexture("graphics/jet/left_turn.png"));
+        planeActor.addAnimation("explosion", planeExplosionAnimation);
         gameStage.addActor(planeActor);
         plane.setDestroyListener(new GameWorld.DestroyListener() {
             @Override
             public void destroyed() {
-                // TODO: set animation
+                planeActor.setCurrentAnimation("explosion", true);
                 planeActor.addAction(new Action() {
                     float ttl = BOOM_TIME;
                     @Override
@@ -309,7 +314,7 @@ public class GameScreen implements Screen {
 
     public void initResources() {
         rocketDepletedAnimation = new Animation(
-                0.1f,
+                0.2f,
                 new Array<TextureRegion>(
                         new TextureRegion[] {
                                 resourceManager.getRegion("graphics/depleted_missile/Missile00.png"),
@@ -326,6 +331,41 @@ public class GameScreen implements Screen {
                         }
                 ),
                 Animation.PlayMode.NORMAL
+        );
+        rocketExplosionAnimation = new Animation(
+                0.15f,
+                new Array<TextureRegion>(
+                        new TextureRegion[] {
+                                resourceManager.getRegion("graphics/exploding_missile/00.png"),
+                                resourceManager.getRegion("graphics/exploding_missile/01.png"),
+                                resourceManager.getRegion("graphics/exploding_missile/02.png"),
+                                resourceManager.getRegion("graphics/exploding_missile/03.png"),
+                                resourceManager.getRegion("graphics/exploding_missile/04.png"),
+                                resourceManager.getRegion("graphics/exploding_missile/05.png"),
+                                resourceManager.getRegion("graphics/exploding_missile/06.png"),
+                                resourceManager.getRegion("graphics/exploding_missile/07.png")
+                        }
+                )
+        );
+        planeExplosionAnimation = new Animation(
+                0.1f,
+                new Array<TextureRegion>(
+                        new TextureRegion[] {
+                                resourceManager.getRegion("graphics/exploding_jet/00.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/01.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/02.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/03.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/04.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/05.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/06.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/08.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/11.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/12.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/13.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/14.png"),
+                                resourceManager.getRegion("graphics/exploding_jet/15.png")
+                        }
+                )
         );
         background = new Texture(Gdx.files.internal("background.png"));
     }
@@ -368,13 +408,13 @@ public class GameScreen implements Screen {
             // sound.play();
             plane.rotateVelocity(1.5f);
             System.out.println(getCameraAngle(cam));
-            planeActor.setCurrentAnimation("left");
+            planeActor.setCurrentAnimation("left", false);
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             plane.rotateVelocity(-1.5f);
             System.out.println(getCameraAngle(cam));
-            planeActor.setCurrentAnimation("right");
+            planeActor.setCurrentAnimation("right", false);
         } else {
-            planeActor.setCurrentAnimation("default");
+            planeActor.setCurrentAnimation("default", false);
         }
     }
 
@@ -408,7 +448,7 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         time += delta;
-        if(!paused) {
+        if(!paused && !isGameOver) {
             handleInput();
         }
         update(delta);
@@ -418,7 +458,7 @@ public class GameScreen implements Screen {
         if (!isGameOver && !paused) {
             hud.act();
         }
-
+        gameStage.act(delta);
         gameStage.draw();
         hud.draw();
         if(paused) {
@@ -426,17 +466,10 @@ public class GameScreen implements Screen {
             pauseStage.draw();
         }
         if (isGameOver) {
-            Gdx.app.postRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        TimeUnit.SECONDS.sleep(SWITCH_TO_GAME_OVER_TIME);
-                    } catch(InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    maneuverGame.setScreen(new GameOverScreen(maneuverGame));
-                }
-            });
+            gameOverTimer -= delta;
+            if (gameOverTimer < 0) {
+                maneuverGame.setScreen(new GameOverScreen(maneuverGame));
+            }
         }
         Matrix4 debugMatrix = cam.combined.cpy().scale(1 / world.getScale(), 1 / world.getScale(), 0);
         debugRenderer.render(debugMatrix);

@@ -45,9 +45,10 @@ public class PhysicsActor extends Actor {
         addTexture(name, new TextureRegion(texture));
     }
 
-    public void setCurrentAnimation(String name) {
+    public void setCurrentAnimation(String name, boolean updateElapsedTime) {
         currentAnimation = animations.get(name);
-        elapsedTime = 0;
+        if (updateElapsedTime)
+            elapsedTime = 0;
     }
 
     @Override
