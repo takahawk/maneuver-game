@@ -14,7 +14,9 @@ simple Android game made with libGDX
 1. `git clone https://github.com/sunr1s3/maneuver-game.git`
 2. `cd maneuver-game/maneuver`
 3. if needed set `ANDROID_HOME` variable point to your SDK *OR* `touch local.properties` and fill it with sdk.dir=<PATH TO ANDROID SDK>  
-4. 
+
+Then:
+
 * `./gradlew desktop:run` run on desktop
 * `./gradlew android:installDebug` android:run
 * `./gradlew desktop:dist` build .jar in `desktop/build/libs`
