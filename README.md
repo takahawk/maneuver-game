@@ -1,4 +1,4 @@
-# maneuver-game
+# Maneuver!
 simple Android game made with libGDX
 
 ![Screenshot1](/screenshot/1.jpg?raw=true)
@@ -7,7 +7,7 @@ simple Android game made with libGDX
 
 ### Running and build requires ###
 * JDK6 (JAVA_HOME environment variable must be set to jdk directory)
-* Android SDK for building for Android
+* Android SDK (build-tools 23.0.2) for building for Android
 
 ### How do I get set up? ###
 
